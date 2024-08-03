@@ -1,14 +1,33 @@
 // server.js
 const express = require('express');
 const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
 const { Client, PrivateKey, AccountId, TokenCreateTransaction, TokenMintTransaction } = require('@hashgraph/sdk');
 require('dotenv').config();
 
 const app = express();
+
+//set up CORS
+app.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  next();
+});
+
 const port = process.env.PORT || 5001;
 
 // Configure multer for file uploads
-const upload = multer({ dest: 'uploads/' });
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'uploads/');
+  },
+  filename: (req, file, cb) => {
+    cb(null, `${Date.now()}-${file.originalname}`);
+  },
+});
+const upload = multer({ storage: storage });
 
 // Hedera client setup
 const client = Client.forTestnet();
@@ -21,9 +40,19 @@ app.post('/api/tickets', upload.fields([{ name: 'reservationImage' }, { name: 't
     const reservationImage = req.files['reservationImage'][0];
     const ticketImage = req.files['ticketImage'][0];
 
+    // Read the uploaded images (optional, for demonstration purposes)
+    const reservationImagePath = path.join(__dirname, reservationImage.path);
+    const ticketImagePath = path.join(__dirname, ticketImage.path);
+    const reservationImageData = fs.readFileSync(reservationImagePath);
+    const ticketImageData = fs.readFileSync(ticketImagePath);
+
+    // console.log('Reservation Image:', reservationImageData);
+    // console.log('Ticket Image:', ticketImageData);
+
     // TODO: Implement NFT creation and management using Hedera SDK
 
     // Example: Create a new token
+	
     const tokenCreateTx = await new TokenCreateTransaction()
       .setTokenName("EventTicket")
       .setTokenSymbol("ETK")
@@ -31,10 +60,12 @@ app.post('/api/tickets', upload.fields([{ name: 'reservationImage' }, { name: 't
       .setInitialSupply(0)
       .setTreasuryAccountId(AccountId.fromString(process.env.MY_ACCOUNT_ID))
       .execute(client);
+		
 
     const tokenCreateReceipt = await tokenCreateTx.getReceipt(client);
     const tokenId = tokenCreateReceipt.tokenId;
 
+	console.log('TokenID:', tokenCreateReceipt);
     // Mint tokens
     await new TokenMintTransaction()
       .setTokenId(tokenId)
