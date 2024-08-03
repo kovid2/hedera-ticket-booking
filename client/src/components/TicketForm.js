@@ -18,7 +18,7 @@ const TicketForm = () => {
     formData.append('reservationImage', reservationImage);
     formData.append('ticketImage', ticketImage);
 
-    const response = await fetch('/api/tickets', {
+    const response = await fetch('http://localhost:5001/api/tickets', {
       method: 'POST',
       body: formData,
     });
