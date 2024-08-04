@@ -1,4 +1,3 @@
-// src/components/TicketForm.js
 import React, { useState } from 'react';
 
 const TicketForm = () => {
@@ -10,7 +9,6 @@ const TicketForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // Perform form submission to backend
     const formData = new FormData();
     formData.append('price', price);
     formData.append('currency', currency);
@@ -46,7 +44,6 @@ const TicketForm = () => {
         >
           <option value="HBAR">HBAR</option>
           <option value="ETH">ETH</option>
-          {/* Add more currencies as needed */}
         </select>
       </div>
       <div>
