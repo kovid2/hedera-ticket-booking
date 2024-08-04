@@ -31,7 +31,7 @@ const upload = multer({ storage: storage });
 
 // Hedera client setup
 const client = Client.forTestnet();
-client.setOperator(AccountId.fromString(process.env.MY_ACCOUNT_ID), PrivateKey.fromString(process.env.MY_PRIVATE_KEY));
+client.setOperator(AccountId.fromString(process.env.MY_ACCOUNT_ID), PrivateKey.fromStringDer(process.env.MY_PRIVATE_KEY));
 
 // API endpoint to create tickets
 app.post('/api/tickets', upload.fields([{ name: 'reservationImage' }, { name: 'ticketImage' }]), async (req, res) => {
@@ -56,11 +56,17 @@ app.post('/api/tickets', upload.fields([{ name: 'reservationImage' }, { name: 't
     const tokenCreateTx = await new TokenCreateTransaction()
       .setTokenName("EventTicket")
       .setTokenSymbol("ETK")
+	  .setTokenType(TokenType.NonFungibleUnique)
       .setDecimals(0)
       .setInitialSupply(0)
+	  .setSupplyType(TokenSupplyType.Finite)
+	  .setSupplyKey(PrivateKey.generate())
+	  .setMaxSupply(parseInt(numTickets))
       .setTreasuryAccountId(AccountId.fromString(process.env.MY_ACCOUNT_ID))
       .execute(client);
 		
+	const nftCreateTxSign = await tokenCreateTx.signWithOperator(client);
+	
 
     const tokenCreateReceipt = await tokenCreateTx.getReceipt(client);
     const tokenId = tokenCreateReceipt.tokenId;
