@@ -72,18 +72,18 @@ app.post('/api/tickets', upload.fields([{ name: 'reservationImage' }, { name: 't
 		const reservationImageData = fs.readFileSync(reservationImagePath);
 		const ticketImageData = fs.readFileSync(ticketImagePath);
 
-		// Upload images to IPFS
-        const reservationImageResult = await ipfs.add(reservationImageData);
-        const ticketImageResult = await ipfs.add(ticketImageData);
-
-		const metadata = {
-            price,
-			// title,
-            // date,
-            // venue,
-            reservationImage: `https://ipfs.io/ipfs/${reservationImageResult.path}`,
-            ticketImage: `https://ipfs.io/ipfs/${ticketImageResult.path}`,
-        };
+		 // Upload images to IPFS using Pinata
+		 const reservationImageResult = await pinFileToIPFS(reservationImagePath);
+		 const ticketImageResult = await pinFileToIPFS(ticketImagePath);
+ 
+		 // Metadata to be pushed to IPFS
+		 const metadata = {
+			 price,
+			 currency,
+			 numTickets,
+			 reservationImage: `${process.env.PINATA_URL}/ipfs/${reservationImageResult.IpfsHash}`,
+			 ticketImage: `${process.env.PINATA_URL}/ipfs/${ticketImageResult.IpfsHash}`,
+		 };
 
         // Upload metadata to IPFS using Pinata
         const metadataFilePath = path.join(__dirname, 'uploads', 'metadata.json');
@@ -118,7 +118,7 @@ app.post('/api/tickets', upload.fields([{ name: 'reservationImage' }, { name: 't
 		// Mint tokens
 		await new TokenMintTransaction()
 			.setTokenId(tokenId)
-			.setAmount(parseInt(numTickets))
+			.setMetadata(`${process.env.PINATA_URL}/ipfs/${metadataResult.ipfsHash}`)
 			.execute(client);
 
 		res.status(200).json({ message: 'Tickets created successfully', tokenId });
