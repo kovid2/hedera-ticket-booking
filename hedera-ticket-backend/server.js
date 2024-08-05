@@ -3,9 +3,10 @@ const express = require('express');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const axios = require('axios');
 const { Client, PrivateKey, AccountId, TokenCreateTransaction, TokenMintTransaction } = require('@hashgraph/sdk');
 require('dotenv').config();
-const { create } = require('ipfs-http-client');
+//const { create } = require('ipfs-http-client'); 
 
 const app = express();
 
@@ -35,12 +36,33 @@ const client = Client.forTestnet();
 client.setOperator(AccountId.fromString(process.env.MY_ACCOUNT_ID), PrivateKey.fromStringDer(process.env.MY_PRIVATE_KEY));
 
 // IPFS client setup
-const ipfs = create({ host: 'ipfs.infura.io', port: 5001, protocol: 'https' });
+//const ipfs = create({ host: 'ipfs.infura.io', port: 5001, protocol: 'https' });
+
+// Pinata API setup
+const pinFileToIPFS = async (filePath) => {
+    const url = `https://api.pinata.cloud/pinning/pinFileToIPFS`;
+    const data = new FormData();
+    data.append('file', fs.createReadStream(filePath));
+
+    const response = await axios.post(url, data, {
+        headers: {
+            Authorization: `Bearer ${process.env.PINATA_API_KEY}`,
+            ...data.getHeaders()
+        }
+    });
+
+    if (response.status !== 200) {
+        throw new Error(`Pinata pinFileToIPFS request failed: ${response.statusText}`);
+    }
+
+    return response.data;
+};
 
 // API endpoint to create tickets
 app.post('/api/tickets', upload.fields([{ name: 'reservationImage' }, { name: 'ticketImage' }]), async (req, res) => {
 	try {
-		const {price, currency, numTickets, title, venue, date, city, country} = req.body;
+		//const {price, currency, numTickets, title, venue, date, city, country} = req.body;
+		const {price, currency, numTickets} = req.body;
 		const reservationImage = req.files['reservationImage'][0];
 		const ticketImage = req.files['ticketImage'][0];
 
@@ -56,15 +78,18 @@ app.post('/api/tickets', upload.fields([{ name: 'reservationImage' }, { name: 't
 
 		const metadata = {
             price,
-			title,
-            date,
-            venue,
+			// title,
+            // date,
+            // venue,
             reservationImage: `https://ipfs.io/ipfs/${reservationImageResult.path}`,
             ticketImage: `https://ipfs.io/ipfs/${ticketImageResult.path}`,
         };
 
-        // Upload metadata to IPFS
-        const metadataResult = await ipfs.add(JSON.stringify(metadata));
+        // Upload metadata to IPFS using Pinata
+        const metadataFilePath = path.join(__dirname, 'uploads', 'metadata.json');
+        fs.writeFileSync(metadataFilePath, JSON.stringify(metadata));
+
+        const metadataResult = await pinFileToIPFS(metadataFilePath);
 
 
 		const tokenCreateTx = await new TokenCreateTransaction()
