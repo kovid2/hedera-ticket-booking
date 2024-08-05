@@ -13,6 +13,7 @@
     "@hashgraph/sdk": "^2.49.2",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
+    "ipfs-http-client": "^60.0.1",
     "multer": "^1.4.5-lts.1"
   }
 }

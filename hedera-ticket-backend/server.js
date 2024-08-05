@@ -5,6 +5,7 @@ const path = require('path');
 const fs = require('fs');
 const { Client, PrivateKey, AccountId, TokenCreateTransaction, TokenMintTransaction } = require('@hashgraph/sdk');
 require('dotenv').config();
+const { create } = require('ipfs-http-client');
 
 const app = express();
 
@@ -33,10 +34,13 @@ const upload = multer({ storage: storage });
 const client = Client.forTestnet();
 client.setOperator(AccountId.fromString(process.env.MY_ACCOUNT_ID), PrivateKey.fromStringDer(process.env.MY_PRIVATE_KEY));
 
+// IPFS client setup
+const ipfs = create({ host: 'ipfs.infura.io', port: 5001, protocol: 'https' });
+
 // API endpoint to create tickets
 app.post('/api/tickets', upload.fields([{ name: 'reservationImage' }, { name: 'ticketImage' }]), async (req, res) => {
 	try {
-		const { price, currency, numTickets } = req.body;
+		const {price, currency, numTickets, title, venue, date, city, country} = req.body;
 		const reservationImage = req.files['reservationImage'][0];
 		const ticketImage = req.files['ticketImage'][0];
 
@@ -46,12 +50,22 @@ app.post('/api/tickets', upload.fields([{ name: 'reservationImage' }, { name: 't
 		const reservationImageData = fs.readFileSync(reservationImagePath);
 		const ticketImageData = fs.readFileSync(ticketImagePath);
 
-		// console.log('Reservation Image:', reservationImageData);
-		// console.log('Ticket Image:', ticketImageData);
+		// Upload images to IPFS
+        const reservationImageResult = await ipfs.add(reservationImageData);
+        const ticketImageResult = await ipfs.add(ticketImageData);
 
-		// TODO: Implement NFT creation and management using Hedera SDK
+		const metadata = {
+            price,
+			title,
+            date,
+            venue,
+            reservationImage: `https://ipfs.io/ipfs/${reservationImageResult.path}`,
+            ticketImage: `https://ipfs.io/ipfs/${ticketImageResult.path}`,
+        };
 
-		// Example: Create a new token
+        // Upload metadata to IPFS
+        const metadataResult = await ipfs.add(JSON.stringify(metadata));
+
 
 		const tokenCreateTx = await new TokenCreateTransaction()
 			.setTokenName("EventTicket")
