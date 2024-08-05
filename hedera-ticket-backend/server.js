@@ -47,7 +47,6 @@ const pinFileToIPFS = async (filePath) => {
     const response = await axios.post(url, data, {
         headers: {
             Authorization: `Bearer ${process.env.PINATA_API_KEY}`,
-            ...data.getHeaders()
         }
     });
 
