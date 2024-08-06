@@ -6,6 +6,7 @@ const fs = require('fs');
 const axios = require('axios');
 const { Client, PrivateKey, AccountId, TokenCreateTransaction, TokenMintTransaction } = require('@hashgraph/sdk');
 require('dotenv').config();
+const FormData = require('form-data')
 //const { create } = require('ipfs-http-client'); 
 
 const app = express();
@@ -39,23 +40,49 @@ client.setOperator(AccountId.fromString(process.env.MY_ACCOUNT_ID), PrivateKey.f
 //const ipfs = create({ host: 'ipfs.infura.io', port: 5001, protocol: 'https' });
 
 // Pinata API setup
+// const pinFileToIPFS = async (filePath) => {
+//     const url = `https://api.pinata.cloud/pinning/pinFileToIPFS`;
+//     const data = new FormData();
+//     data.append('file', fs.createReadStream(filePath));
+
+//     const response = await axios.post(url, data, {
+//         headers: {
+//             Authorization: `Bearer ${process.env.PINATA_API_KEY}`,
+//         }
+//     });
+
+//     if (response.status !== 200) {
+//         throw new Error(`Pinata pinFileToIPFS request failed: ${response.statusText}`);
+//     }
+
+//     return response.data;
+// };
+
 const pinFileToIPFS = async (filePath) => {
-    const url = `https://api.pinata.cloud/pinning/pinFileToIPFS`;
-    const data = new FormData();
-    data.append('file', fs.createReadStream(filePath));
-
-    const response = await axios.post(url, data, {
-        headers: {
-            Authorization: `Bearer ${process.env.PINATA_API_KEY}`,
-        }
+    const formData = new FormData();
+    
+    const file = fs.createReadStream(filePath)
+    formData.append('file', file)
+    
+    const pinataMetadata = JSON.stringify({
+      name: 'File name',
     });
+    formData.append('pinataMetadata', pinataMetadata);
 
-    if (response.status !== 200) {
-        throw new Error(`Pinata pinFileToIPFS request failed: ${response.statusText}`);
+    try{
+      const res = await axios.post("https://api.pinata.cloud/pinning/pinFileToIPFS", formData, {
+        maxBodyLength: "Infinity",
+        headers: {
+          'Content-Type': `multipart/form-data; boundary=${formData._boundary}`,
+          Authorization: process.env.PINATA_API_KEY
+        }
+      });
+      console.log(res.data);
+    } catch (error) {
+      console.log(error);
     }
+}
 
-    return response.data;
-};
 
 // API endpoint to create tickets
 app.post('/api/tickets', upload.fields([{ name: 'reservationImage' }, { name: 'ticketImage' }]), async (req, res) => {
