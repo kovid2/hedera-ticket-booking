@@ -4,7 +4,18 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const axios = require('axios');
-const { Client, PrivateKey, AccountId, TokenCreateTransaction, TokenMintTransaction } = require('@hashgraph/sdk');
+const { 
+	Hbar,
+	Client,
+	AccountId,
+	PrivateKey,
+	TokenType,
+	TokenSupplyType,
+	TokenMintTransaction,
+	TransferTransaction,
+	AccountBalanceQuery,
+	TokenCreateTransaction,
+	TokenAssociateTransaction, } = require('@hashgraph/sdk');
 require('dotenv').config();
 const FormData = require('form-data')
 //const { create } = require('ipfs-http-client'); 
@@ -78,6 +89,7 @@ const pinFileToIPFS = async (filePath) => {
         }
       });
       console.log(res.data);
+	  return res.data;
     } catch (error) {
       console.log(error);
     }
@@ -105,6 +117,9 @@ app.post('/api/tickets', upload.fields([{ name: 'reservationImage' }, { name: 't
 
 		 const reservationImageResult = await pinFileToIPFS(reservationImagePath);
 		 const ticketImageResult = await pinFileToIPFS(ticketImagePath);
+
+		 console.log("reservationImageResult", reservationImageResult);
+		
  
 		 // Metadata to be pushed to IPFS
 		 const metadata = {
