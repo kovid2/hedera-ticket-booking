@@ -178,7 +178,28 @@ app.post('/api/tickets', upload.fields([{ name: 'reservationImage' }, { name: 't
 		  );
 
 
+		  // Check the balance before the transfer for the treasury account
+			var balanceCheckTx = await new AccountBalanceQuery()
+			.setAccountId(process.env.MY_ACCOUNT_ID)
+			.execute(client);
+			console.log(
+			`Treasury balance: ${balanceCheckTx.tokens._map.get(
+				tokenId.toString()
+			)} NFTs of ID ${tokenId}`
+			);
 
+			// Check the balance before the transfer for the user account
+			balanceCheckTx = await new AccountBalanceQuery()
+			.setAccountId(process.env.ASHLEY_ACC_ID)
+			.execute(client);
+			console.log(
+			`Ashley's balance: ${balanceCheckTx.tokens._map.get(
+				tokenId.toString()
+			)} NFTs of ID ${tokenId}`
+			);
+
+
+			
 
 
 		//res.status(200).json({ message: 'Tickets created successfully', tokenId });
