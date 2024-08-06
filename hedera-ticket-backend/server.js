@@ -147,7 +147,7 @@ app.post('/api/tickets', upload.fields([{ name: 'reservationImage' }, { name: 't
 			.setSupplyKey(supplyKey)
 			.setMaxSupply(parseInt(numTickets))
 			.setTreasuryAccountId(AccountId.fromString(process.env.MY_ACCOUNT_ID))
-			.execute(client);
+			.freezeWith(client);
 
 		const nftCreateTxSign = await tokenCreateTx.signWithOperator(client);
 		const nftCreateSubmit = await nftCreateTxSign.execute(client);
@@ -165,7 +165,7 @@ app.post('/api/tickets', upload.fields([{ name: 'reservationImage' }, { name: 't
 		// Mint tokens
 		const mintNFT = new TokenMintTransaction()
 			.setTokenId(tokenId)
-			.setMetadata(`${process.env.PINATA_URL}/ipfs/${metadataResult.ipfsHash}`)
+			.setMetadata([Buffer.from(`${process.env.PINATA_URL}/ipfs/${metadataResult.ipfsHash}`)])
 			.freezeWith(client)
 
 		
@@ -176,11 +176,11 @@ app.post('/api/tickets', upload.fields([{ name: 'reservationImage' }, { name: 't
 		console.log(`Minted NFT with Token ID: ` + tokenId);
 
 		 //Create the associate transaction and sign with Users key
-		 const associateTx = new TokenAssociateTransaction()
+		 const associateTx = await new TokenAssociateTransaction()
 		 .setAccountId(process.env.ASHLEY_ACC_ID)
 		 .setTokenIds([tokenId])
 		 .freezeWith(client)
-		 .sign(process.env.ASHLEY_PRIVATE_KEY);
+		 .sign(PrivateKey.fromStringDer(process.env.ASHLEY_PRIVATE_KEY));
 
 		 //Submit the associate transaction
 		 const associateTxSubmit = await associateTx.execute(client);
@@ -216,9 +216,9 @@ app.post('/api/tickets', upload.fields([{ name: 'reservationImage' }, { name: 't
 
 			// Transfer the NFT to the user
 			const tokenTransferTx = await new TransferTransaction()
-			.addTokenTransfer(tokenId, 1, process.env.MY_ACCOUNT_ID, process.env.ASHLEY_ACC_ID)
+			.addNftTransfer(tokenId, 1, process.env.MY_ACCOUNT_ID, process.env.ASHLEY_ACC_ID)
 			.freezeWith(client)
-			.signWithOperator(client);
+			.sign(PrivateKey.fromStringDer(process.env.MY_PRIVATE_KEY));
 
 			const tokenTransferSubmit = await tokenTransferTx.execute(client);
   			const tokenTransferRx = await tokenTransferSubmit.getReceipt(client);
