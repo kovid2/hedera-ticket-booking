@@ -199,6 +199,19 @@ app.post('/api/tickets', upload.fields([{ name: 'reservationImage' }, { name: 't
 			);
 
 
+			// Transfer the NFT to the user
+			const tokenTransferTx = await new TransferTransaction()
+			.addTokenTransfer(tokenId, 1, process.env.MY_ACCOUNT_ID, process.env.ASHLEY_ACC_ID)
+			.freezeWith(client)
+			.signWithOperator(client);
+
+			const tokenTransferSubmit = await tokenTransferTx.execute(client);
+  			const tokenTransferRx = await tokenTransferSubmit.getReceipt(client);
+
+			  console.log(
+				`\nNFT transfer from Treasury to Ashley ${tokenTransferRx.status} \n`
+			  );
+			
 			
 
 
