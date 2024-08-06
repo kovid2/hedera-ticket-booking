@@ -6,6 +6,15 @@ const EventSchema = new mongoose.Schema({
 		required: true,
 		unique: true,
 	},
+	supplyKey: {
+		type: String,
+		required: true,
+	},
+	metadataUri: {
+		type: String,
+		required: true,
+	},
+	
 	title: {
 		type: String,
 		required: true,
