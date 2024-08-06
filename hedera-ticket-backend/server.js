@@ -103,58 +103,83 @@ app.post('/api/tickets', upload.fields([{ name: 'reservationImage' }, { name: 't
 
 		 // Upload images to IPFS using Pinata
 
-		 try {
 		 const reservationImageResult = await pinFileToIPFS(reservationImagePath);
-		 }
-		 catch (error) {
-			 console.log(error);
-		 }
-		 //const ticketImageResult = await pinFileToIPFS(ticketImagePath);
+		 const ticketImageResult = await pinFileToIPFS(ticketImagePath);
  
 		 // Metadata to be pushed to IPFS
-		//  const metadata = {
-		// 	 price,
-		// 	 currency,
-		// 	 numTickets,
-		// 	 reservationImage: `${process.env.PINATA_URL}/ipfs/${reservationImageResult.IpfsHash}`,
-		// 	 ticketImage: `${process.env.PINATA_URL}/ipfs/${ticketImageResult.IpfsHash}`,
-		//  };
+		 const metadata = {
+			 price,
+			 currency,
+			 numTickets,
+			 reservationImage: `${process.env.PINATA_URL}/ipfs/${reservationImageResult.IpfsHash}`,
+			 ticketImage: `${process.env.PINATA_URL}/ipfs/${ticketImageResult.IpfsHash}`,
+		 };
 
         // Upload metadata to IPFS using Pinata
-        // const metadataFilePath = path.join(__dirname, 'uploads', 'metadata.json');
-        // fs.writeFileSync(metadataFilePath, JSON.stringify(metadata));
+        const metadataFilePath = path.join(__dirname, 'metadata', 'metadata.json');
+        fs.writeFileSync(metadataFilePath, JSON.stringify(metadata));
+        const metadataResult = await pinFileToIPFS(metadataFilePath);
 
-        //const metadataResult = await pinFileToIPFS(metadataFilePath);
+		const supplyKey = PrivateKey.generate();
+
+		const tokenCreateTx = await new TokenCreateTransaction()
+			.setTokenName("EventTicket")
+			.setTokenSymbol("ETK")
+			.setTokenType(TokenType.NonFungibleUnique)
+			.setDecimals(0)
+			.setInitialSupply(0)
+			.setSupplyType(TokenSupplyType.Finite)
+			.setSupplyKey(supplyKey)
+			.setMaxSupply(parseInt(numTickets))
+			.setTreasuryAccountId(AccountId.fromString(process.env.MY_ACCOUNT_ID))
+			.execute(client);
+
+		const nftCreateTxSign = await tokenCreateTx.signWithOperator(client);
+		const nftCreateSubmit = await nftCreateTxSign.execute(client);
+		//Get the transaction receipt
+		const nftCreateRx = await nftCreateSubmit.getReceipt(client);
+
+		//Get the token ID
+		const tokenId = nftCreateRx.tokenId;
+
+		//Log the token ID
+		console.log(`\nCreated NFT with Token ID: ` + tokenId);
+
+		const maxTransactionFee = new Hbar(20);
+
+		// Mint tokens
+		const mintNFT = new TokenMintTransaction()
+			.setTokenId(tokenId)
+			.setMetadata(`${process.env.PINATA_URL}/ipfs/${metadataResult.ipfsHash}`)
+			.freezeWith(client)
+
+		
+		const mintNFTSign = await mintNFT.sign(supplyKey);
+		const mintNFTSubmit = await mintNFTSign.execute(client);
+
+		const mintNFTReceipt = await mintNFTSubmit.getReceipt(client);
+		console.log(`Minted NFT with Token ID: ` + tokenId);
+
+		 //Create the associate transaction and sign with Users key
+		 const associateTx = new TokenAssociateTransaction()
+		 .setAccountId(process.env.ASHLEY_ACC_ID)
+		 .setTokenIds([tokenId])
+		 .freezeWith(client)
+		 .sign(process.env.ASHLEY_PRIVATE_KEY);
+
+		 //Submit the associate transaction
+		 const associateTxSubmit = await associateTx.execute(client);
+
+		 //Get the associate transaction receipt
+		 const associateTxReceipt = await associateTxSubmit.getReceipt(client);
+
+		 console.log(
+			`NFT association with Ashley's account: ${associateTxReceipt.status}\n`
+		  );
 
 
-		// const tokenCreateTx = await new TokenCreateTransaction()
-		// 	.setTokenName("EventTicket")
-		// 	.setTokenSymbol("ETK")
-		// 	.setTokenType(TokenType.NonFungibleUnique)
-		// 	.setDecimals(0)
-		// 	.setInitialSupply(0)
-		// 	.setSupplyType(TokenSupplyType.Finite)
-		// 	.setSupplyKey(PrivateKey.generate())
-		// 	.setMaxSupply(parseInt(numTickets))
-		// 	.setTreasuryAccountId(AccountId.fromString(process.env.MY_ACCOUNT_ID))
-		// 	.execute(client);
 
-		// const nftCreateTxSign = await tokenCreateTx.signWithOperator(client);
-		// const nftCreateSubmit = await nftCreateTxSign.execute(client);
-		// //Get the transaction receipt
-		// const nftCreateRx = await nftCreateSubmit.getReceipt(client);
 
-		// //Get the token ID
-		// const tokenId = nftCreateRx.tokenId;
-
-		// //Log the token ID
-		// console.log(`\nCreated NFT with Token ID: ` + tokenId);
-
-		// // Mint tokens
-		// await new TokenMintTransaction()
-		// 	.setTokenId(tokenId)
-		// 	.setMetadata(`${process.env.PINATA_URL}/ipfs/${metadataResult.ipfsHash}`)
-		// 	.execute(client);
 
 		//res.status(200).json({ message: 'Tickets created successfully', tokenId });
 	} catch (error) {
