@@ -15,8 +15,9 @@ const UserSchema = new mongoose.Schema({
 			},
 			// what concert or event
 			eventId: { 
-				type: mongoose.Schema.Types.ObjectId,
-				ref: 'Event'
+				type: String,
+				ref: 'Event',
+				required: true,
 			},
 			purchaseDate: { 
 				type: Date, default: Date.now 
@@ -47,7 +48,23 @@ const UserSchema = new mongoose.Schema({
 	loyaltyPoints: {
 		type: Number,
 		default: 0,
-	}
+	},
+
+	savedEvents: [{
+		type: String,
+		ref: 'Event',
+		required: true,
+	}],
+
+	genres:[{
+		type: String,
+		required: true,
+	}],
+
+	typesOfEvents:[{
+		type: String,
+		required: true,
+	}],
 
 }, { timestamps: true });
 
