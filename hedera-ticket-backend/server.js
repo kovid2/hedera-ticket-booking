@@ -111,6 +111,7 @@ app.post('/api/tickets', upload.fields([{ name: 'reservationImage' }, { name: 't
             description: "This is a ticket for a concert",
             image: `${process.env.PINATA_URL}/ipfs/${reservationImageResult.IpfsHash}`,
             type: "image/jpeg",
+			creator: "Hedera-ticketing-system"
         };
 
         // Upload metadata to IPFS using Pinata
