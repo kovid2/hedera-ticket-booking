@@ -47,28 +47,18 @@ const upload = multer({ storage: storage });
 const client = Client.forTestnet();
 client.setOperator(AccountId.fromString(process.env.MY_ACCOUNT_ID), PrivateKey.fromStringDer(process.env.MY_PRIVATE_KEY));
 
-// IPFS client setup
-//const ipfs = create({ host: 'ipfs.infura.io', port: 5001, protocol: 'https' });
+//shorten URL
+const shortenURL = async (longUrl) => {
+    try {
+        const response = await axios.get(`https://tinyurl.com/api-create.php?url=${encodeURIComponent(longUrl)}`);
+        return response.data;
+    } catch (error) {
+        console.error('Error shortening URL:', error);
+        throw new Error('Failed to shorten URL');
+    }
+};
 
-// Pinata API setup
-// const pinFileToIPFS = async (filePath) => {
-//     const url = `https://api.pinata.cloud/pinning/pinFileToIPFS`;
-//     const data = new FormData();
-//     data.append('file', fs.createReadStream(filePath));
-
-//     const response = await axios.post(url, data, {
-//         headers: {
-//             Authorization: `Bearer ${process.env.PINATA_API_KEY}`,
-//         }
-//     });
-
-//     if (response.status !== 200) {
-//         throw new Error(`Pinata pinFileToIPFS request failed: ${response.statusText}`);
-//     }
-
-//     return response.data;
-// };
-
+//pin file to IPFS
 const pinFileToIPFS = async (filePath) => {
     const formData = new FormData();
     
@@ -123,17 +113,20 @@ app.post('/api/tickets', upload.fields([{ name: 'reservationImage' }, { name: 't
  
 		 // Metadata to be pushed to IPFS
 		 const metadata = {
-			 price,
-			 currency,
-			 numTickets,
-			 reservationImage: `${process.env.PINATA_URL}/ipfs/${reservationImageResult.IpfsHash}`,
-			 ticketImage: `${process.env.PINATA_URL}/ipfs/${ticketImageResult.IpfsHash}`,
+			 name : "Reservation Ticket for concert",
+			 description : "This is a ticket for a concert",
+			 image: `${process.env.PINATA_URL}/ipfs/${reservationImageResult.IpfsHash}`,
+			 type : "image/jpeg",
+			// reservationImage: `${process.env.PINATA_URL}/ipfs/${reservationImageResult.IpfsHash}`,
+			// ticketImage: `${process.env.PINATA_URL}/ipfs/${ticketImageResult.IpfsHash}`,
 		 };
 
         // Upload metadata to IPFS using Pinata
         const metadataFilePath = path.join(__dirname, 'metadata', 'metadata.json');
         fs.writeFileSync(metadataFilePath, JSON.stringify(metadata));
         const metadataResult = await pinFileToIPFS(metadataFilePath);
+
+		console.log("metadataResult", metadataResult);
 
 		const supplyKey = PrivateKey.generate();
 
@@ -161,11 +154,20 @@ app.post('/api/tickets', upload.fields([{ name: 'reservationImage' }, { name: 't
 		console.log(`\nCreated NFT with Token ID: ` + tokenId);
 
 		const maxTransactionFee = new Hbar(20);
+		const metadataLink = `${process.env.PINATA_URL}/ipfs/${metadataResult.IpfsHash}`;
+
+				// Shorten the metadata link
+		const shortenedMetadataLink = await shortenURL(metadataLink);
+
+		if (Buffer.byteLength(shortenedMetadataLink) > 100) {
+			throw new Error('Metadata too long even after shortening ' + Buffer.byteLength(shortenedMetadataLink));
+		}
+
 
 		// Mint tokens
 		const mintNFT = new TokenMintTransaction()
 			.setTokenId(tokenId)
-			.setMetadata([Buffer.from(`${process.env.PINATA_URL}/ipfs/${metadataResult.ipfsHash}`)])
+			.setMetadata([Buffer.from(shortenedMetadataLink)])
 			.freezeWith(client)
 
 		
