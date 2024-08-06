@@ -74,7 +74,7 @@ const pinFileToIPFS = async (filePath) => {
         maxBodyLength: "Infinity",
         headers: {
           'Content-Type': `multipart/form-data; boundary=${formData._boundary}`,
-          Authorization: process.env.PINATA_API_KEY
+          Authorization: `Bearer ${process.env.PINATA_API_KEY}`
         }
       });
       console.log(res.data);
@@ -98,56 +98,65 @@ app.post('/api/tickets', upload.fields([{ name: 'reservationImage' }, { name: 't
 		const reservationImageData = fs.readFileSync(reservationImagePath);
 		const ticketImageData = fs.readFileSync(ticketImagePath);
 
+		console.log("file path", reservationImagePath);
+		console.log("file path", ticketImagePath);
+
 		 // Upload images to IPFS using Pinata
+
+		 try {
 		 const reservationImageResult = await pinFileToIPFS(reservationImagePath);
-		 const ticketImageResult = await pinFileToIPFS(ticketImagePath);
+		 }
+		 catch (error) {
+			 console.log(error);
+		 }
+		 //const ticketImageResult = await pinFileToIPFS(ticketImagePath);
  
 		 // Metadata to be pushed to IPFS
-		 const metadata = {
-			 price,
-			 currency,
-			 numTickets,
-			 reservationImage: `${process.env.PINATA_URL}/ipfs/${reservationImageResult.IpfsHash}`,
-			 ticketImage: `${process.env.PINATA_URL}/ipfs/${ticketImageResult.IpfsHash}`,
-		 };
+		//  const metadata = {
+		// 	 price,
+		// 	 currency,
+		// 	 numTickets,
+		// 	 reservationImage: `${process.env.PINATA_URL}/ipfs/${reservationImageResult.IpfsHash}`,
+		// 	 ticketImage: `${process.env.PINATA_URL}/ipfs/${ticketImageResult.IpfsHash}`,
+		//  };
 
         // Upload metadata to IPFS using Pinata
-        const metadataFilePath = path.join(__dirname, 'uploads', 'metadata.json');
-        fs.writeFileSync(metadataFilePath, JSON.stringify(metadata));
+        // const metadataFilePath = path.join(__dirname, 'uploads', 'metadata.json');
+        // fs.writeFileSync(metadataFilePath, JSON.stringify(metadata));
 
-        const metadataResult = await pinFileToIPFS(metadataFilePath);
+        //const metadataResult = await pinFileToIPFS(metadataFilePath);
 
 
-		const tokenCreateTx = await new TokenCreateTransaction()
-			.setTokenName("EventTicket")
-			.setTokenSymbol("ETK")
-			.setTokenType(TokenType.NonFungibleUnique)
-			.setDecimals(0)
-			.setInitialSupply(0)
-			.setSupplyType(TokenSupplyType.Finite)
-			.setSupplyKey(PrivateKey.generate())
-			.setMaxSupply(parseInt(numTickets))
-			.setTreasuryAccountId(AccountId.fromString(process.env.MY_ACCOUNT_ID))
-			.execute(client);
+		// const tokenCreateTx = await new TokenCreateTransaction()
+		// 	.setTokenName("EventTicket")
+		// 	.setTokenSymbol("ETK")
+		// 	.setTokenType(TokenType.NonFungibleUnique)
+		// 	.setDecimals(0)
+		// 	.setInitialSupply(0)
+		// 	.setSupplyType(TokenSupplyType.Finite)
+		// 	.setSupplyKey(PrivateKey.generate())
+		// 	.setMaxSupply(parseInt(numTickets))
+		// 	.setTreasuryAccountId(AccountId.fromString(process.env.MY_ACCOUNT_ID))
+		// 	.execute(client);
 
-		const nftCreateTxSign = await tokenCreateTx.signWithOperator(client);
-		const nftCreateSubmit = await nftCreateTxSign.execute(client);
-		//Get the transaction receipt
-		const nftCreateRx = await nftCreateSubmit.getReceipt(client);
+		// const nftCreateTxSign = await tokenCreateTx.signWithOperator(client);
+		// const nftCreateSubmit = await nftCreateTxSign.execute(client);
+		// //Get the transaction receipt
+		// const nftCreateRx = await nftCreateSubmit.getReceipt(client);
 
-		//Get the token ID
-		const tokenId = nftCreateRx.tokenId;
+		// //Get the token ID
+		// const tokenId = nftCreateRx.tokenId;
 
-		//Log the token ID
-		console.log(`\nCreated NFT with Token ID: ` + tokenId);
+		// //Log the token ID
+		// console.log(`\nCreated NFT with Token ID: ` + tokenId);
 
-		// Mint tokens
-		await new TokenMintTransaction()
-			.setTokenId(tokenId)
-			.setMetadata(`${process.env.PINATA_URL}/ipfs/${metadataResult.ipfsHash}`)
-			.execute(client);
+		// // Mint tokens
+		// await new TokenMintTransaction()
+		// 	.setTokenId(tokenId)
+		// 	.setMetadata(`${process.env.PINATA_URL}/ipfs/${metadataResult.ipfsHash}`)
+		// 	.execute(client);
 
-		res.status(200).json({ message: 'Tickets created successfully', tokenId });
+		//res.status(200).json({ message: 'Tickets created successfully', tokenId });
 	} catch (error) {
 		console.error('Error creating tickets:', error);
 		res.status(500).json({ error: 'Failed to create tickets' });
