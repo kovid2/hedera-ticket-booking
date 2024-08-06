@@ -238,7 +238,8 @@ app.post('/api/tickets', upload.fields([{ name: 'reservationImage' }, { name: 't
 				  tokenId.toString()
 			  )} NFTs of ID ${tokenId}`
 			  );
-			  
+
+
 			  //Check the balance after the transfer for the user account
 			  balanceCheckTx = await new AccountBalanceQuery()
 			  .setAccountId(process.env.ASHLEY_ACC_ID)
@@ -257,6 +258,18 @@ app.post('/api/tickets', upload.fields([{ name: 'reservationImage' }, { name: 't
 	}
 });
 
+
+app.post('/api/tickets/mint/:tokenId', async (req, res) => {
+	const { tokenID } = req.params;
+	const { accountId, accountKey  } = req.body;
+
+	//Mint tokens
+	
+
+
+});
+
 app.listen(port, () => {
 	console.log(`Server is running on port ${port}`);
 });
+
