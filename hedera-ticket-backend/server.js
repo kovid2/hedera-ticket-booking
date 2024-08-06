@@ -163,11 +163,11 @@ app.post('/api/tickets', upload.fields([{ name: 'reservationImage' }, { name: 't
         console.log(`Minted NFT with Token ID: ` + tokenId);
 
         // Transfer 20 HBAR from the user's account to the treasury
-        const transferHbarTx = new TransferTransaction()
+        const transferHbarTx = await new TransferTransaction()
             .addHbarTransfer(process.env.ASHLEY_ACC_ID, new Hbar(-20))
             .addHbarTransfer(process.env.MY_ACCOUNT_ID, new Hbar(20))
             .freezeWith(client)
-            .sign(PrivateKey.fromStringDer(process.env.USER_PRIVATE_KEY));
+            .sign(PrivateKey.fromStringDer(process.env.ASHLEY_PRIVATE_KEY));
 
         const transferHbarSubmit = await transferHbarTx.execute(client);
         const transferHbarReceipt = await transferHbarSubmit.getReceipt(client);
@@ -179,7 +179,7 @@ app.post('/api/tickets', upload.fields([{ name: 'reservationImage' }, { name: 't
             .setAccountId(process.env.ASHLEY_ACC_ID)
             .setTokenIds([tokenId])
             .freezeWith(client)
-            .sign(PrivateKey.fromString(process.env.ASHLEY_PRIVATE_KEY));
+            .sign(PrivateKey.fromStringDer(process.env.ASHLEY_PRIVATE_KEY));
 
         const associateTxSubmit = await associateTx.execute(client);
         const associateTxReceipt = await associateTxSubmit.getReceipt(client);
