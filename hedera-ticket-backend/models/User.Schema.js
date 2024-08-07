@@ -9,7 +9,7 @@ const UserSchema = new mongoose.Schema({
 	tickets: [
 		{
 			// your ticket number
-			tokenID: {
+			tokenId: {
 				type: String,
 			},
 			// what concert or event
@@ -26,7 +26,7 @@ const UserSchema = new mongoose.Schema({
 
 	eventsCreated: [{
 		// your event id
-		eventID: {
+		eventId: {
 			type: String,
 		},
 	}],

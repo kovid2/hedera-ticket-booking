@@ -6,6 +6,10 @@ const EventSchema = new mongoose.Schema({
 		required: true,
 		unique: true,
 	},
+	organizerID: {
+		type: String,
+		required: true,
+	},
 	supplyKey: {
 		type: String,
 		required: true,
@@ -14,7 +18,7 @@ const EventSchema = new mongoose.Schema({
 		type: String,
 		required: true,
 	},
-	
+
 	title: {
 		type: String,
 		required: true,
@@ -23,8 +27,8 @@ const EventSchema = new mongoose.Schema({
 		type: String,
 		required: true,
 	},
-	date: {
-		type: Date,
+	dateAndTime: {
+		type : Date,
 		required: true,
 	},
 	city: {
