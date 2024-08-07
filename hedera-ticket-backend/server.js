@@ -19,6 +19,8 @@ const {
 require('dotenv').config();
 const FormData = require('form-data');
 const { connectToServer, getDb } = require('./db');
+const EventSchema = require('./models/Event.Schema');
+const User = require('./models/User.Schema');
 
 const DB = getDb();
 
@@ -85,6 +87,26 @@ const pinFileToIPFS = async (filePath) => {
         console.log(error);
     }
 }
+
+/*************************API ENDPOINT***************************/
+
+// API endpoint to verify login and create a new user
+app.post('/api/login', async (req, res) => {
+	const {walletId} = req.body;
+	const user = await User.findOne({walletId});
+	if (!user) {
+		//create a new user
+		const newUser = new User({
+			walletId
+		});
+		await newUser.save();
+		res.status(200).json({user: newUser});
+	}
+	else {
+		res.status(200).json({user});
+	}
+})
+
 
 // API endpoint to create tickets
 app.post('/api/tickets', upload.fields([{ name: 'reservationImage' }, { name: 'ticketImage' }]), async (req, res) => {
@@ -155,6 +177,10 @@ app.post('/api/tickets', upload.fields([{ name: 'reservationImage' }, { name: 't
         if (Buffer.byteLength(shortenedMetadataLink) > 100) {
             throw new Error('Metadata too long even after shortening ' + Buffer.byteLength(shortenedMetadataLink));
         }
+
+		const eventData = DB.collection('events').insertOne({
+
+		})
 
         // Mint tokens
         const mintNFT = new TokenMintTransaction()
