@@ -228,78 +228,90 @@ app.post('/api/tickets', upload.fields([{ name: 'reservationImage' }, { name: 't
 		}
 
 		// Mint tokens to treasuary
-		const mintNFT = new TokenMintTransaction()
-			.setTokenId(tokenId)
-			.setAmount(numTickets)
-			.setMetadata([Buffer.from(metadataUri)])
-			.freezeWith(client);
+		for (let i = 0; i < numTickets; i++) {
+			const mintNFT = new TokenMintTransaction()
+				.setTokenId(tokenId)
+				.setMetadata([Buffer.from(metadataUri)])
+				.freezeWith(client);
 
-		const mintNFTSign = await mintNFT.sign(supplyKey);
-		const mintNFTSubmit = await mintNFTSign.execute(client);
+			const mintNFTSign = await mintNFT.sign(supplyKey);
+			const mintNFTSubmit = await mintNFTSign.execute(client);
 
-		const mintNFTReceipt = await mintNFTSubmit.getReceipt(client);
-		console.log(`Minted NFT with Token ID: ` + tokenId);
+			const mintNFTReceipt = await mintNFTSubmit.getReceipt(client);
+			console.log(`Minted NFT with Token ID: ` + tokenId);
+		}
+		
+		// const mintNFT = new TokenMintTransaction()
+		// 	.setTokenId(tokenId)
+		// 	.setMetadata([Buffer.from(metadataUri)])
+		// 	.freezeWith(client);
+
+		// const mintNFTSign = await mintNFT.sign(supplyKey);
+		// const mintNFTSubmit = await mintNFTSign.execute(client);
+
+		// const mintNFTReceipt = await mintNFTSubmit.getReceipt(client);
+		// console.log(`Minted NFT with Token ID: ` + tokenId);
 
 
 
-		// Transfer 20 HBAR from the user's account to the treasury
-		const transferHbarTx = await new TransferTransaction()
-			.addHbarTransfer(process.env.ASHLEY_ACC_ID, new Hbar(-20))
-			.addHbarTransfer(process.env.MY_ACCOUNT_ID, new Hbar(20))
-			.freezeWith(client)
-			.sign(PrivateKey.fromStringDer(process.env.ASHLEY_PRIVATE_KEY));
+		// // Transfer 20 HBAR from the user's account to the treasury
+		// const transferHbarTx = await new TransferTransaction()
+		// 	.addHbarTransfer(process.env.ASHLEY_ACC_ID, new Hbar(-20))
+		// 	.addHbarTransfer(process.env.MY_ACCOUNT_ID, new Hbar(20))
+		// 	.freezeWith(client)
+		// 	.sign(PrivateKey.fromStringDer(process.env.ASHLEY_PRIVATE_KEY));
 
-		const transferHbarSubmit = await transferHbarTx.execute(client);
-		const transferHbarReceipt = await transferHbarSubmit.getReceipt(client);
+		// const transferHbarSubmit = await transferHbarTx.execute(client);
+		// const transferHbarReceipt = await transferHbarSubmit.getReceipt(client);
 
-		console.log(`\n20 HBAR transferred from user to treasury: ${transferHbarReceipt.status}\n`);
+		// console.log(`\n20 HBAR transferred from user to treasury: ${transferHbarReceipt.status}\n`);
 
-		// Associate the NFT with the user's account
-		const associateTx = await new TokenAssociateTransaction()
-			.setAccountId(process.env.ASHLEY_ACC_ID)
-			.setTokenIds([tokenId])
-			.freezeWith(client)
-			.sign(PrivateKey.fromStringDer(process.env.ASHLEY_PRIVATE_KEY));
+		// // Associate the NFT with the user's account
+		// const associateTx = await new TokenAssociateTransaction()
+		// 	.setAccountId(process.env.ASHLEY_ACC_ID)
+		// 	.setTokenIds([tokenId])
+		// 	.freezeWith(client)
+		// 	.sign(PrivateKey.fromStringDer(process.env.ASHLEY_PRIVATE_KEY));
 
-		const associateTxSubmit = await associateTx.execute(client);
-		const associateTxReceipt = await associateTxSubmit.getReceipt(client);
+		// const associateTxSubmit = await associateTx.execute(client);
+		// const associateTxReceipt = await associateTxSubmit.getReceipt(client);
 
-		console.log(`NFT association with Ashley's account: ${associateTxReceipt.status}\n`);
+		// console.log(`NFT association with Ashley's account: ${associateTxReceipt.status}\n`);
 
-		// Check the balance before the transfer for the treasury account
-		var balanceCheckTx = await new AccountBalanceQuery()
-			.setAccountId(process.env.MY_ACCOUNT_ID)
-			.execute(client);
-		console.log(`Treasury balance: ${balanceCheckTx.tokens._map.get(tokenId.toString())} NFTs of ID ${tokenId}`);
+		// // Check the balance before the transfer for the treasury account
+		// var balanceCheckTx = await new AccountBalanceQuery()
+		// 	.setAccountId(process.env.MY_ACCOUNT_ID)
+		// 	.execute(client);
+		// console.log(`Treasury balance: ${balanceCheckTx.tokens._map.get(tokenId.toString())} NFTs of ID ${tokenId}`);
 
-		// Check the balance before the transfer for the user account
-		balanceCheckTx = await new AccountBalanceQuery()
-			.setAccountId(process.env.ASHLEY_ACC_ID)
-			.execute(client);
-		console.log(`Ashley's balance: ${balanceCheckTx.tokens._map.get(tokenId.toString())} NFTs of ID ${tokenId}`);
+		// // Check the balance before the transfer for the user account
+		// balanceCheckTx = await new AccountBalanceQuery()
+		// 	.setAccountId(process.env.ASHLEY_ACC_ID)
+		// 	.execute(client);
+		// console.log(`Ashley's balance: ${balanceCheckTx.tokens._map.get(tokenId.toString())} NFTs of ID ${tokenId}`);
 
-		// Transfer the NFT to the user
-		const tokenTransferTx = await new TransferTransaction()
-			.addNftTransfer(tokenId, 1, process.env.MY_ACCOUNT_ID, process.env.ASHLEY_ACC_ID)
-			.freezeWith(client)
-			.sign(PrivateKey.fromStringDer(process.env.MY_PRIVATE_KEY));
+		// // Transfer the NFT to the user
+		// const tokenTransferTx = await new TransferTransaction()
+		// 	.addNftTransfer(tokenId, 1, process.env.MY_ACCOUNT_ID, process.env.ASHLEY_ACC_ID)
+		// 	.freezeWith(client)
+		// 	.sign(PrivateKey.fromStringDer(process.env.MY_PRIVATE_KEY));
 
-		const tokenTransferSubmit = await tokenTransferTx.execute(client);
-		const tokenTransferRx = await tokenTransferSubmit.getReceipt(client);
+		// const tokenTransferSubmit = await tokenTransferTx.execute(client);
+		// const tokenTransferRx = await tokenTransferSubmit.getReceipt(client);
 
-		console.log(`\nNFT transfer from Treasury to Ashley ${tokenTransferRx.status} \n`);
+		// console.log(`\nNFT transfer from Treasury to Ashley ${tokenTransferRx.status} \n`);
 
-		// Check the balance after the transfer for the treasury account
-		balanceCheckTx = await new AccountBalanceQuery()
-			.setAccountId(process.env.MY_ACCOUNT_ID)
-			.execute(client);
-		console.log(`Treasury balance: ${balanceCheckTx.tokens._map.get(tokenId.toString())} NFTs of ID ${tokenId}`);
+		// // Check the balance after the transfer for the treasury account
+		// balanceCheckTx = await new AccountBalanceQuery()
+		// 	.setAccountId(process.env.MY_ACCOUNT_ID)
+		// 	.execute(client);
+		// console.log(`Treasury balance: ${balanceCheckTx.tokens._map.get(tokenId.toString())} NFTs of ID ${tokenId}`);
 
-		// Check the balance after the transfer for the user account
-		balanceCheckTx = await new AccountBalanceQuery()
-			.setAccountId(process.env.ASHLEY_ACC_ID)
-			.execute(client);
-		console.log(`Ashley's balance: ${balanceCheckTx.tokens._map.get(tokenId.toString())} NFTs of ID ${tokenId}`);
+		// // Check the balance after the transfer for the user account
+		// balanceCheckTx = await new AccountBalanceQuery()
+		// 	.setAccountId(process.env.ASHLEY_ACC_ID)
+		// 	.execute(client);
+		// console.log(`Ashley's balance: ${balanceCheckTx.tokens._map.get(tokenId.toString())} NFTs of ID ${tokenId}`);
 
 		res.status(200).json({ message: 'Tickets created successfully', tokenId });
 	} catch (error) {
@@ -314,7 +326,8 @@ app.get('/api/tickets/transfer', async (req, res) => {
 	const accountId = process.env.ASHLEY_ACC_ID;
 
 	//fetch event info 
-	const event = DB.collection('events').findOne({ eventID: tokenId });
+	const event = await DB.collection('events').findOne({ eventID: tokenId });
+	console.log("event", event);
 	if (!event) {
 		return res.status(404).json({ error: 'Event not found' });
 	}
@@ -333,11 +346,12 @@ app.get('/api/tickets/transfer', async (req, res) => {
 	// Transfer HBAR from the user's account to the treasury
 
 	// Convert event price to tinybars
-	const eventPriceInTinybars = parseInt(event.price) * 100000000;
+	//const eventPriceInTinybars = parseInt(event.price);
+	console.log("event price", event.price);
 
 	const transferHbarTx = await new TransferTransaction()
-		.addHbarTransfer(accountId, new Hbar(-1))
-		.addHbarTransfer(process.env.MY_ACCOUNT_ID, new Hbar(1))
+		.addHbarTransfer(accountId, new Hbar((-1* parseInt(event.price))))
+		.addHbarTransfer(process.env.MY_ACCOUNT_ID, new Hbar(parseInt(event.price)))
 		.freezeWith(client)
 		.sign(PrivateKey.fromStringDer(process.env.ASHLEY_PRIVATE_KEY));
 
@@ -373,7 +387,8 @@ app.get('/api/tickets/transfer', async (req, res) => {
 
 		// Transfer the NFT to the user
 		const tokenTransferTx = await new TransferTransaction()
-			.addNftTransfer(tokenId, 1, process.env.MY_ACCOUNT_ID, accountId)
+			//TODO: change the number to events.ticketsSold+1
+			.addNftTransfer(tokenId, event.ticketsSold+2, process.env.MY_ACCOUNT_ID, accountId)
 			.freezeWith(client)
 			.sign(PrivateKey.fromStringDer(process.env.MY_PRIVATE_KEY));
 
