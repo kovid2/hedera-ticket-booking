@@ -322,7 +322,7 @@ app.post('/api/tickets', upload.fields([{ name: 'reservationImage' }, { name: 't
 
 app.get('/api/tickets/transfer', async (req, res) => {
 	//const { tokenId } = req.params;
-	const tokenId = "0.0.4661931";
+	const tokenId = "0.0.4666386";
 	const accountId = process.env.ASHLEY_ACC_ID;
 
 	//fetch event info 
@@ -388,7 +388,7 @@ app.get('/api/tickets/transfer', async (req, res) => {
 		// Transfer the NFT to the user
 		const tokenTransferTx = await new TransferTransaction()
 			//TODO: change the number to events.ticketsSold+1
-			.addNftTransfer(tokenId, event.ticketsSold+2, process.env.MY_ACCOUNT_ID, accountId)
+			.addNftTransfer(tokenId, event.ticketsSold+1, process.env.MY_ACCOUNT_ID, accountId)
 			.freezeWith(client)
 			.sign(PrivateKey.fromStringDer(process.env.MY_PRIVATE_KEY));
 
@@ -414,10 +414,10 @@ app.get('/api/tickets/transfer', async (req, res) => {
 		//update event's ticketsSold
 		await DB.collection("events").findOneAndUpdate({ eventID: event.eventID }, { $inc: { ticketsSold: 1 } });
 
-		res.status(200).json({ message: 'NFT transferred successfully successfully', tokenId });
+		return res.status(200).json({ message: 'NFT transferred successfully successfully', tokenId });
 	}
 
-	console.log(`NFT association with Ashley's account: ${associateTxReceipt.status}\n`);
+	//console.log(`NFT association with Ashley's account: ${associateTxReceipt.status}\n`);
 
 	// Check the balance before the transfer for the treasury account
 	var balanceCheckTx = await new AccountBalanceQuery()
@@ -434,7 +434,7 @@ app.get('/api/tickets/transfer', async (req, res) => {
 
 	// Transfer the NFT to the user
 	const tokenTransferTx = await new TransferTransaction()
-		.addNftTransfer(tokenId, 1, process.env.MY_ACCOUNT_ID, accountId)
+	.addNftTransfer(tokenId, event.ticketsSold+1, process.env.MY_ACCOUNT_ID, accountId)
 		.freezeWith(client)
 		.sign(PrivateKey.fromStringDer(process.env.MY_PRIVATE_KEY));
 
