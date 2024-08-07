@@ -391,7 +391,11 @@ app.post('/api/tickets/transfer/', async (req, res) => {
 			.execute(client);
 		console.log(`Ashley's balance: ${balanceCheckTx.tokens._map.get(tokenId.toString())} NFTs of ID ${tokenId}`);
 
-	
+		//update user's tickets
+		await DB.collection("users").findOneAndUpdate({ walletId: accountId }, { $push: { tickets: { tokenId, eventId: event.eventID } } });
+		//update event's ticketsSold
+		await DB.collection("events").findOneAndUpdate({ eventID: event.eventID }, { $inc: { ticketsSold: 1 } });
+		
 		res.status(200).json({ message: 'NFT transferred successfully successfully', tokenId });
 		
 	
