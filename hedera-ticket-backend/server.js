@@ -18,6 +18,9 @@ const {
     TokenAssociateTransaction, } = require('@hashgraph/sdk');
 require('dotenv').config();
 const FormData = require('form-data');
+const { connectToServer, getDb } = require('./db');
+
+const DB = getDb();
 
 const app = express();
 
@@ -255,6 +258,14 @@ app.post('/api/tickets/mint/:tokenId', async (req, res) => {
     //Mint tokens
 });
 
-app.listen(port, () => {
-    console.log(`Server is running on port ${port}`);
+app.listen(port, async () => {
+	try {
+		await connectToServer();
+		console.log ("Connected to MongoDB");
+		
+	}
+	catch (err) {
+		console.log(err);
+	}
+	console.log(`Server is running on port ${port}`);
 });
