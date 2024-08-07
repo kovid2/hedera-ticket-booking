@@ -122,6 +122,7 @@ app.post('/api/tickets', upload.fields([{ name: 'reservationImage' }, { name: 't
         console.log("metadataResult", metadataResult);
 
         const supplyKey = PrivateKey.generate();
+		const freezeKey = PrivateKey.generateED25519();
 
         const tokenCreateTx = await new TokenCreateTransaction()
             .setTokenName("EventTicket")
@@ -131,6 +132,7 @@ app.post('/api/tickets', upload.fields([{ name: 'reservationImage' }, { name: 't
             .setInitialSupply(0)
             .setSupplyType(TokenSupplyType.Finite)
             .setSupplyKey(supplyKey)
+			.setFreezeKey(freezeKey)
             .setMaxSupply(parseInt(numTickets))
             .setTreasuryAccountId(AccountId.fromString(process.env.MY_ACCOUNT_ID))
             .freezeWith(client);
@@ -203,7 +205,7 @@ app.post('/api/tickets', upload.fields([{ name: 'reservationImage' }, { name: 't
         const tokenTransferTx = await new TransferTransaction()
             .addNftTransfer(tokenId, 1, process.env.MY_ACCOUNT_ID, process.env.ASHLEY_ACC_ID)
             .freezeWith(client)
-            .sign(PrivateKey.fromString(process.env.MY_PRIVATE_KEY));
+            .sign(PrivateKey.fromStringDer(process.env.MY_PRIVATE_KEY));
 
         const tokenTransferSubmit = await tokenTransferTx.execute(client);
         const tokenTransferRx = await tokenTransferSubmit.getReceipt(client);
@@ -232,6 +234,23 @@ app.post('/api/tickets', upload.fields([{ name: 'reservationImage' }, { name: 't
 app.post('/api/tickets/mint/:tokenId', async (req, res) => {
     const { tokenID } = req.params;
     const { accountId, accountKey } = req.body;
+
+
+	const metadataLink = `${process.env.PINATA_URL}/ipfs/${metadataResult.IpfsHash}`;
+
+	const shortenedMetadataLink = await shortenURL(metadataLink);
+
+	if (Buffer.byteLength(shortenedMetadataLink) > 100) {
+		throw new Error('Metadata too long even after shortening ' + Buffer.byteLength(shortenedMetadataLink));
+	}
+
+	// Mint tokens
+	const mintNFT = new TokenMintTransaction()
+		.setTokenId(tokenId)
+		.setMetadata([Buffer.from(shortenedMetadataLink)])
+		.freezeWith(client);
+
+
 
     //Mint tokens
 });

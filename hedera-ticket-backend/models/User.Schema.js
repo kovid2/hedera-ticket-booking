@@ -22,7 +22,6 @@ const UserSchema = new mongoose.Schema({
 			purchaseDate: { 
 				type: Date, default: Date.now 
 			},
-
 		},
 	],
 
