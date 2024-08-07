@@ -113,7 +113,7 @@ app.post('/api/login', async (req, res) => {
 app.post('/api/tickets', upload.fields([{ name: 'reservationImage' }, { name: 'ticketImage' }]), async (req, res) => {
 	try {
 
-		 // TODO: Get more data from front end
+		// TODO: Get more data from front end
 		const { price, currency, numTickets, accountId } = req.body;
 		const reservationImage = req.files['reservationImage'][0];
 		const ticketImage = req.files['ticketImage'][0];
@@ -308,7 +308,7 @@ app.post('/api/tickets', upload.fields([{ name: 'reservationImage' }, { name: 't
 	}
 });
 
-app.post('/api/tickets/transfer/', async (req, res) => {
+app.get('/api/tickets/transfer', async (req, res) => {
 	//const { tokenId } = req.params;
 	const tokenId = "0.0.4661931";
 	const accountId = process.env.ASHLEY_ACC_ID;
@@ -321,29 +321,34 @@ app.post('/api/tickets/transfer/', async (req, res) => {
 
 
 	async function bCheckerFcn(id) {
-        balanceCheckTx = await new AccountBalanceQuery().setAccountId(id).execute(client);
-        return [balanceCheckTx.tokens._map.get(tokenId.toString()), balanceCheckTx.hbars];
-    }
+		balanceCheckTx = await new AccountBalanceQuery().setAccountId(id).execute(client);
+		return [balanceCheckTx.tokens._map.get(tokenId.toString()), balanceCheckTx.hbars];
+	}
 
 	if (bCheckerFcn(accountId)[0] < event.price) {
 		return res.status(400).json({ error: 'Insufficient funds' });
 
 	}
 
-		// Transfer 20 HBAR from the user's account to the treasury
-		const transferHbarTx = await new TransferTransaction()
-			.addHbarTransfer(accountId, new Hbar(-event.price))
-			.addHbarTransfer(process.env.MY_ACCOUNT_ID, new Hbar(event.price))
-			.freezeWith(client)
-			.sign(PrivateKey.fromStringDer(process.env.ASHLEY_PRIVATE_KEY));
+	// Transfer HBAR from the user's account to the treasury
 
-			
+	// Convert event price to tinybars
+	const eventPriceInTinybars = parseInt(event.price) * 100000000;
 
-		const transferHbarSubmit = await transferHbarTx.execute(client);
-		const transferHbarReceipt = await transferHbarSubmit.getReceipt(client);
-		console.log(`20 HBAR transferred from user to treasury: ${transferHbarReceipt.status}`);
+	const transferHbarTx = await new TransferTransaction()
+		.addHbarTransfer(accountId, new Hbar(-1))
+		.addHbarTransfer(process.env.MY_ACCOUNT_ID, new Hbar(1))
+		.freezeWith(client)
+		.sign(PrivateKey.fromStringDer(process.env.ASHLEY_PRIVATE_KEY));
 
-		// Associate the NFT with the user's account
+
+
+	const transferHbarSubmit = await transferHbarTx.execute(client);
+	const transferHbarReceipt = await transferHbarSubmit.getReceipt(client);
+	console.log(`20 HBAR transferred from user to treasury: ${transferHbarReceipt.status}`);
+
+	// Associate the NFT with the user's account
+	try {
 		const associateTx = await new TokenAssociateTransaction()
 			.setAccountId(accountId)
 			.setTokenIds([tokenId])
@@ -352,10 +357,8 @@ app.post('/api/tickets/transfer/', async (req, res) => {
 
 		const associateTxSubmit = await associateTx.execute(client);
 		const associateTxReceipt = await associateTxSubmit.getReceipt(client);
-
-		console.log(`NFT association with Ashley's account: ${associateTxReceipt.status}\n`);
-
-		// Check the balance before the transfer for the treasury account
+	} catch (error) {
+		console.log("NFT already associated with user");
 		var balanceCheckTx = await new AccountBalanceQuery()
 			.setAccountId(process.env.MY_ACCOUNT_ID)
 			.execute(client);
@@ -395,29 +398,75 @@ app.post('/api/tickets/transfer/', async (req, res) => {
 		await DB.collection("users").findOneAndUpdate({ walletId: accountId }, { $push: { tickets: { tokenId, eventId: event.eventID } } });
 		//update event's ticketsSold
 		await DB.collection("events").findOneAndUpdate({ eventID: event.eventID }, { $inc: { ticketsSold: 1 } });
-		
+
 		res.status(200).json({ message: 'NFT transferred successfully successfully', tokenId });
-		
-	
+	}
+
+	console.log(`NFT association with Ashley's account: ${associateTxReceipt.status}\n`);
+
+	// Check the balance before the transfer for the treasury account
+	var balanceCheckTx = await new AccountBalanceQuery()
+		.setAccountId(process.env.MY_ACCOUNT_ID)
+		.execute(client);
+	console.log(`Treasury balance: ${balanceCheckTx.tokens._map.get(tokenId.toString())} NFTs of ID ${tokenId}`);
+
+	// Check the balance before the transfer for the user account
+	balanceCheckTx = await new AccountBalanceQuery()
+		.setAccountId(process.env.ASHLEY_ACC_ID)
+		.execute(client);
+	console.log(`Ashley's balance: ${balanceCheckTx.tokens._map.get(tokenId.toString())} NFTs of ID ${tokenId}`);
+
+
+	// Transfer the NFT to the user
+	const tokenTransferTx = await new TransferTransaction()
+		.addNftTransfer(tokenId, 1, process.env.MY_ACCOUNT_ID, accountId)
+		.freezeWith(client)
+		.sign(PrivateKey.fromStringDer(process.env.MY_PRIVATE_KEY));
+
+	const tokenTransferSubmit = await tokenTransferTx.execute(client);
+	const tokenTransferRx = await tokenTransferSubmit.getReceipt(client);
+
+	console.log(`\nNFT transfer from Treasury to Ashley ${tokenTransferRx.status} \n`);
+
+	// Check the balance after the transfer for the treasury account
+	balanceCheckTx = await new AccountBalanceQuery()
+		.setAccountId(process.env.MY_ACCOUNT_ID)
+		.execute(client);
+	console.log(`Treasury balance: ${balanceCheckTx.tokens._map.get(tokenId.toString())} NFTs of ID ${tokenId}`);
+
+	// Check the balance after the transfer for the user account
+	balanceCheckTx = await new AccountBalanceQuery()
+		.setAccountId(process.env.ASHLEY_ACC_ID)
+		.execute(client);
+	console.log(`Ashley's balance: ${balanceCheckTx.tokens._map.get(tokenId.toString())} NFTs of ID ${tokenId}`);
+
+	//update user's tickets
+	await DB.collection("users").findOneAndUpdate({ walletId: accountId }, { $push: { tickets: { tokenId, eventId: event.eventID } } });
+	//update event's ticketsSold
+	await DB.collection("events").findOneAndUpdate({ eventID: event.eventID }, { $inc: { ticketsSold: 1 } });
+
+	res.status(200).json({ message: 'NFT transferred successfully successfully', tokenId });
+
+
 });
 
 app.listen(port, async () => {
-    try {
-   	   db.connectToServer();
+	try {
+		db.connectToServer();
 
-        DB = db.getDb();
-        console.log("Connected to MongoDB");
+		DB = db.getDb();
+		console.log("Connected to MongoDB");
 
-        // Ensure the database is connected before handling requests
-        app.use((req, res, next) => {
-            if (!DB) {
-                return res.status(500).json({ error: 'Database connection not established' });
-            }
-            next();
-        });
+		// Ensure the database is connected before handling requests
+		app.use((req, res, next) => {
+			if (!DB) {
+				return res.status(500).json({ error: 'Database connection not established' });
+			}
+			next();
+		});
 
-        console.log(`Server is running on port ${port}`);
-    } catch (err) {
-        console.error('Failed to connect to MongoDB:', err);
-    }
+		console.log(`Server is running on port ${port}`);
+	} catch (err) {
+		console.error('Failed to connect to MongoDB:', err);
+	}
 });
