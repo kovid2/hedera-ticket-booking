@@ -310,8 +310,15 @@ app.post('/api/tickets', upload.fields([{ name: 'reservationImage' }, { name: 't
 
 app.post('/api/tickets/transfer/:tokenId', async (req, res) => {
 	const { tokenId } = req.params;
-	const { accountId, signer } = req.body;
+	const { accountId } = req.body;
 
+
+	async function bCheckerFcn(id) {
+        balanceCheckTx = await new AccountBalanceQuery().setAccountId(id).execute(client);
+        return [balanceCheckTx.tokens._map.get(tokenId.toString()), balanceCheckTx.hbars];
+    }
+
+	
 		// Transfer 20 HBAR from the user's account to the treasury
 		const transferHbarTx = await new TransferTransaction()
 			.addHbarTransfer(accountId, new Hbar(-20))
