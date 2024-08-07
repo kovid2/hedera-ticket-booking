@@ -18,11 +18,12 @@ const {
 	TokenAssociateTransaction, } = require('@hashgraph/sdk');
 require('dotenv').config();
 const FormData = require('form-data');
-const { connectToServer, getDb } = require('./db');
+const db = require('./db');
 const EventSchema = require('./models/Event.Schema');
 const User = require('./models/User.Schema');
 
-const DB = getDb();
+
+let DB;
 
 const app = express();
 
@@ -111,6 +112,8 @@ app.post('/api/login', async (req, res) => {
 // API endpoint to create tickets
 app.post('/api/tickets', upload.fields([{ name: 'reservationImage' }, { name: 'ticketImage' }]), async (req, res) => {
 	try {
+
+		 // TODO: Get more data from front end
 		const { price, currency, numTickets, accountId } = req.body;
 		const reservationImage = req.files['reservationImage'][0];
 		const ticketImage = req.files['ticketImage'][0];
@@ -134,7 +137,7 @@ app.post('/api/tickets', upload.fields([{ name: 'reservationImage' }, { name: 't
 		const metadata = {
 			name: "Reservation Ticket for concert",
 			description: "This is a ticket for a concert",
-			image: `${process.env.PINATA_URL}/ipfs/${reservationImageResult.IpfsHash}`,
+			image: `ipfs://${reservationImageResult.IpfsHash}`,
 			type: "image/jpeg",
 			creator: "Hedera-ticketing-system"
 		};
@@ -170,48 +173,58 @@ app.post('/api/tickets', upload.fields([{ name: 'reservationImage' }, { name: 't
 		console.log(`\nCreated NFT with Token ID: ` + tokenId);
 
 		const maxTransactionFee = new Hbar(20);
-		const metadataLink = `${process.env.PINATA_URL}/ipfs/${metadataResult.IpfsHash}`;
 
-		const shortenedMetadataLink = await shortenURL(metadataLink);
+		const metadataUri = `ipfs://${metadataResult.IpfsHash}`;
+		//const metadataLink = `${process.env.PINATA_URL}/ipfs/${metadataResult.IpfsHash}`;
 
-		if (Buffer.byteLength(shortenedMetadataLink) > 100) {
-			throw new Error('Metadata too long even after shortening ' + Buffer.byteLength(shortenedMetadataLink));
-		}
+		//const shortenedMetadataLink = await shortenURL(metadataLink);
+
+		// if (Buffer.byteLength(shortenedMetadataLink) > 100) {
+		// 	throw new Error('Metadata too long even after shortening ' + Buffer.byteLength(shortenedMetadataLink));
+		// }
 
 		//TODO: Make event data come from the front end
 		const eventData = new EventSchema({
 			eventID: tokenId.toString(),
 			organizerID: process.env.MY_ACCOUNT_ID, //for now
 			supplyKey: supplyKey.toString(),
-			metadataUri: shortenedMetadataLink,
+			metadataUri: metadataUri,
 			title: "Event Ticket",
 			venue: "Online",
-			date: new Date(),
+			dateAndTime: new Date(),
 			city: "Online",
 			country: "Online",
-			image: `${process.env.PINATA_URL}/ipfs/${ticketImageResult.IpfsHash}`,
+			image: `ipfs://${ticketImageResult.IpfsHash}`,
 			description: "This is a ticket for an event",
 			totalTickets: numTickets,
 			ticketsSold: 0,
 			price: price,
 		});
+		DB = db.getDb();
 
-		await eventData.save();
+		await DB.collection('events').insertOne(eventData);
+
+		//await eventData.save();
 
 		//update user's eventsCreated
 
 		//if user not found create a new user
-		const user = await User.findOne({ walletId: accountId });
+
+		// TODO: redundant check during production remove it once metamaks is fixed
+		const user = await DB.collection("users").findOne({ walletId: process.env.MY_ACCOUNT_ID });
+		console.log("user", user);
 		if (!user) {
+
+			console.log("Creating new user");
 			const newUser = new User({
-				//TODO: change it once metamask is fixed
+				// TODO: change it once metamask is fixed
 				walletId: process.env.MY_ACCOUNT_ID, //ik we using same account for so many things lmao
 				eventsCreated: [tokenId.toString()]
 			});
-			await newUser.save();
+			await DB.collection("users").insertOne(newUser);
 		}
 		else {
-			await User.findOneAndUpdate({ walletId: accountId }, { $push: { eventsCreated: tokenId.toString() } });
+			await DB.collection("users").findOneAndUpdate({ walletId: process.env.MY_ACCOUNT_ID }, { $push: { eventsCreated: tokenId.toString() } });
 		}
 
 
@@ -219,7 +232,7 @@ app.post('/api/tickets', upload.fields([{ name: 'reservationImage' }, { name: 't
 		// Mint tokens
 		const mintNFT = new TokenMintTransaction()
 			.setTokenId(tokenId)
-			.setMetadata([Buffer.from(shortenedMetadataLink)])
+			.setMetadata([Buffer.from(metadataUri)])
 			.freezeWith(client);
 
 		const mintNFTSign = await mintNFT.sign(supplyKey);
@@ -319,13 +332,22 @@ app.post('/api/tickets/mint/:tokenId', async (req, res) => {
 });
 
 app.listen(port, async () => {
-	try {
-		await connectToServer();
-		console.log("Connected to MongoDB");
+    try {
+   	   db.connectToServer();
 
-	}
-	catch (err) {
-		console.log(err);
-	}
-	console.log(`Server is running on port ${port}`);
+        DB = db.getDb();
+        console.log("Connected to MongoDB");
+
+        // Ensure the database is connected before handling requests
+        app.use((req, res, next) => {
+            if (!DB) {
+                return res.status(500).json({ error: 'Database connection not established' });
+            }
+            next();
+        });
+
+        console.log(`Server is running on port ${port}`);
+    } catch (err) {
+        console.error('Failed to connect to MongoDB:', err);
+    }
 });

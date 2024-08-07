@@ -1,22 +1,17 @@
 const { MongoClient } = require("mongodb");
 
-const client = new MongoClient(process.env.MONGO_URI);
- 
-let _db;
-let _admindb;
 
+ 
+var _db;
+ 
 module.exports = {
-  connectToServer: function (callback) {
-    client.connect(function (err, db) {
-     
-      if (db)
-      {
-        _db = db.db("Hedera");
-        _admindb = db.db("admin");
-        console.log("Successfully connected to MongoDB."); 
-      }
-      return callback(err);
-         });
+  connectToServer: async function  () {
+    console.log("Connecting to MongoDB");
+    const client = new MongoClient(process.env.MONGO_URI);
+    _db = client.db('hedera');
+    console.log(_db);
+    _admindb = client.db('admin');
+
   },
  
   getDb: function () {

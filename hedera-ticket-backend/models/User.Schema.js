@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+const mongoose = require('mongoose');
 
 const UserSchema = new mongoose.Schema({
 	walletId: {
@@ -28,6 +28,7 @@ const UserSchema = new mongoose.Schema({
 		// your event id
 		eventId: {
 			type: String,
+			ref: 'Event',
 		},
 	}],
 	city: {
@@ -64,4 +65,4 @@ const UserSchema = new mongoose.Schema({
 
 const User = mongoose.model('User', UserSchema);
 
-export default User;
+module.exports = User;
