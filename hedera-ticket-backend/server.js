@@ -367,6 +367,32 @@ app.post('/api/tickets/transfer/', async (req, res) => {
 			.execute(client);
 		console.log(`Ashley's balance: ${balanceCheckTx.tokens._map.get(tokenId.toString())} NFTs of ID ${tokenId}`);
 
+
+		// Transfer the NFT to the user
+		const tokenTransferTx = await new TransferTransaction()
+			.addNftTransfer(tokenId, 1, process.env.MY_ACCOUNT_ID, accountId)
+			.freezeWith(client)
+			.sign(PrivateKey.fromStringDer(process.env.MY_PRIVATE_KEY));
+
+		const tokenTransferSubmit = await tokenTransferTx.execute(client);
+		const tokenTransferRx = await tokenTransferSubmit.getReceipt(client);
+
+		console.log(`\nNFT transfer from Treasury to Ashley ${tokenTransferRx.status} \n`);
+
+		// Check the balance after the transfer for the treasury account
+		balanceCheckTx = await new AccountBalanceQuery()
+			.setAccountId(process.env.MY_ACCOUNT_ID)
+			.execute(client);
+		console.log(`Treasury balance: ${balanceCheckTx.tokens._map.get(tokenId.toString())} NFTs of ID ${tokenId}`);
+
+		// Check the balance after the transfer for the user account
+		balanceCheckTx = await new AccountBalanceQuery()
+			.setAccountId(process.env.ASHLEY_ACC_ID)
+			.execute(client);
+		console.log(`Ashley's balance: ${balanceCheckTx.tokens._map.get(tokenId.toString())} NFTs of ID ${tokenId}`);
+
+	
+		res.status(200).json({ message: 'NFT transferred successfully successfully', tokenId });
 		
 	
 });
