@@ -227,11 +227,10 @@ app.post('/api/tickets', upload.fields([{ name: 'reservationImage' }, { name: 't
 			await DB.collection("users").findOneAndUpdate({ walletId: process.env.MY_ACCOUNT_ID }, { $push: { eventsCreated: tokenId.toString() } });
 		}
 
-
-		/*************** MIGRATE THE THINGS BELOW TO THEIR SPECIFIC ROUTES ****************/
-		// Mint tokens
+		// Mint tokens to treasuary
 		const mintNFT = new TokenMintTransaction()
 			.setTokenId(tokenId)
+			.setAmount(numTickets)
 			.setMetadata([Buffer.from(metadataUri)])
 			.freezeWith(client);
 
@@ -240,6 +239,8 @@ app.post('/api/tickets', upload.fields([{ name: 'reservationImage' }, { name: 't
 
 		const mintNFTReceipt = await mintNFTSubmit.getReceipt(client);
 		console.log(`Minted NFT with Token ID: ` + tokenId);
+
+
 
 		// Transfer 20 HBAR from the user's account to the treasury
 		const transferHbarTx = await new TransferTransaction()
@@ -307,28 +308,25 @@ app.post('/api/tickets', upload.fields([{ name: 'reservationImage' }, { name: 't
 	}
 });
 
-app.post('/api/tickets/mint/:tokenId', async (req, res) => {
+app.post('/api/tickets/transfer/:tokenId', async (req, res) => {
 	const { tokenId } = req.params;
-	const { accountId, accountKey } = req.body;
+	const { accountId, signer } = req.body;
 
+		// Transfer 20 HBAR from the user's account to the treasury
+		const transferHbarTx = await new TransferTransaction()
+			.addHbarTransfer(accountId, new Hbar(-20))
+			.addHbarTransfer(process.env.MY_ACCOUNT_ID, new Hbar(20))
+			.freezeWith(client)
+			//.sign(PrivateKey.fromStringDer(process.env.ASHLEY_PRIVATE_KEY));
 
-	const metadataLink = `${process.env.PINATA_URL}/ipfs/${metadataResult.IpfsHash}`;
+			const signedTx = await signer.signTransaction({
+				to: transferTx.toBytes(),
+			  });
 
-	const shortenedMetadataLink = await shortenURL(metadataLink);
-
-	if (Buffer.byteLength(shortenedMetadataLink) > 100) {
-		throw new Error('Metadata too long even after shortening ' + Buffer.byteLength(shortenedMetadataLink));
-	}
-
-	// Mint tokens
-	const mintNFT = new TokenMintTransaction()
-		.setTokenId(tokenId)
-		.setMetadata([Buffer.from(shortenedMetadataLink)])
-		.freezeWith(client);
-
-
-
-	//Mint tokens
+		const transferHbarSubmit = await transferHbarTx.execute(client);
+		const transferHbarReceipt = await transferHbarSubmit.getReceipt(client);
+		console.log(`20 HBAR transferred from user to treasury: ${transferHbarReceipt.status}`);
+	
 });
 
 app.listen(port, async () => {
