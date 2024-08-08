@@ -1,15 +1,22 @@
 import React, { useState } from 'react';
-import { ethers } from 'ethers';
 import {
+    PrivateKey,
     Hbar,
     Client,
-    PrivateKey,
     AccountId,
     TokenAssociateTransaction,
     TransferTransaction,
     AccountBalanceQuery
 } from '@hashgraph/sdk';
 
+
+// Ensure environment variables are defined
+const myAccountId = process.env.REACT_APP_MY_ACCOUNT_ID;
+const myPrivateKey = process.env.REACT_APP_MY_PRIVATE_KEY;
+
+if (!myAccountId || !myPrivateKey) {
+    throw new Error("Environment variables REACT_APP_MY_ACCOUNT_ID and REACT_APP_MY_PRIVATE_KEY must be defined");
+}
 // Hedera client setup
 const client = Client.forTestnet();
 client.setOperator(AccountId.fromString(process.env.REACT_APP_MY_ACCOUNT_ID), PrivateKey.fromStringDer(process.env.REACT_APP_MY_PRIVATE_KEY));
@@ -43,34 +50,35 @@ export const MetaMaskWallet = () => {
         }
 
         try {
-            const provider = new ethers.providers.Web3Provider(window.ethereum);
-            await provider.send("eth_requestAccounts", []);
-            const signer = provider.getSigner();
-            const account = await signer.getAddress();
+            await window.ethereum.request({ method: 'eth_requestAccounts' });
+            const signerAddress = walletAddress;
 
             const tokenId = "0.0.4666386";
             const priceInHbar = 2; // Price in HBAR
-            const eventPriceInTinybars = priceInHbar * 100000000; // Convert HBAR to tinybars
+    
 
             // Check user balance on Hedera network
-            const balanceCheckTx = await new AccountBalanceQuery().setAccountId(AccountId.fromString(walletAddress)).execute(client);
+            const balanceCheckTx = await new AccountBalanceQuery().setAccountId(AccountId.fromString(signerAddress)).execute(client);
             const userHbarBalance = balanceCheckTx.hbars;
 
-            if (userHbarBalance.toTinybars() < eventPriceInTinybars) {
+            if (userHbarBalance < priceInHbar) {
                 console.log("Insufficient funds");
                 return;
             }
 
             // Transfer HBAR from the user's account to the treasury
             const transferHbarTx = await new TransferTransaction()
-                .addHbarTransfer(walletAddress, new Hbar(-1 * priceInHbar))
+                .addHbarTransfer(signerAddress, new Hbar(-1 * priceInHbar))
                 .addHbarTransfer(process.env.REACT_APP_MY_ACCOUNT_ID, new Hbar(priceInHbar))
                 .freezeWith(client);
 
             // Sign the transaction with MetaMask
             const serializedTx = transferHbarTx.toBytes();
-            const signedTx = await signer.signMessage(serializedTx);
-            const signedTransaction = TransferTransaction.fromBytes(Buffer.from(signedTx, 'hex'));
+            const signedTx = await window.ethereum.request({
+                method: 'eth_sign',
+                params: [signerAddress, '0x' + Buffer.from(serializedTx).toString('hex')]
+            });
+            const signedTransaction = TransferTransaction.fromBytes(Buffer.from(signedTx.substring(2), 'hex'));
 
             const transferHbarSubmit = await signedTransaction.execute(client);
             const transferHbarReceipt = await transferHbarSubmit.getReceipt(client);
@@ -79,14 +87,17 @@ export const MetaMaskWallet = () => {
             // Associate the NFT with the user's account
             try {
                 const associateTx = await new TokenAssociateTransaction()
-                    .setAccountId(walletAddress)
+                    .setAccountId(signerAddress)
                     .setTokenIds([tokenId])
                     .freezeWith(client);
 
                 // Sign the transaction with MetaMask
                 const serializedAssociateTx = associateTx.toBytes();
-                const signedAssociateTx = await signer.signMessage(serializedAssociateTx);
-                const signedAssociateTransaction = TokenAssociateTransaction.fromBytes(Buffer.from(signedAssociateTx, 'hex'));
+                const signedAssociateTx = await window.ethereum.request({
+                    method: 'eth_sign',
+                    params: [signerAddress, '0x' + Buffer.from(serializedAssociateTx).toString('hex')]
+                });
+                const signedAssociateTransaction = TokenAssociateTransaction.fromBytes(Buffer.from(signedAssociateTx.substring(2), 'hex'));
 
                 const associateTxSubmit = await signedAssociateTransaction.execute(client);
                 const associateTxReceipt = await associateTxSubmit.getReceipt(client);
@@ -97,13 +108,16 @@ export const MetaMaskWallet = () => {
 
             // Transfer the NFT to the user
             const tokenTransferTx = await new TransferTransaction()
-                .addNftTransfer(tokenId, 1, process.env.REACT_APP_MY_ACCOUNT_ID, walletAddress)
+                .addNftTransfer(tokenId, 1, process.env.REACT_APP_MY_ACCOUNT_ID, signerAddress)
                 .freezeWith(client);
 
             // Sign the transaction with MetaMask
             const serializedTokenTransferTx = tokenTransferTx.toBytes();
-            const signedTokenTransferTx = await signer.signMessage(serializedTokenTransferTx);
-            const signedTokenTransferTransaction = TransferTransaction.fromBytes(Buffer.from(signedTokenTransferTx, 'hex'));
+            const signedTokenTransferTx = await window.ethereum.request({
+                method: 'eth_sign',
+                params: [signerAddress, '0x' + Buffer.from(serializedTokenTransferTx).toString('hex')]
+            });
+            const signedTokenTransferTransaction = TransferTransaction.fromBytes(Buffer.from(signedTokenTransferTx.substring(2), 'hex'));
 
             const tokenTransferSubmit = await signedTokenTransferTransaction.execute(client);
             const tokenTransferRx = await tokenTransferSubmit.getReceipt(client);
