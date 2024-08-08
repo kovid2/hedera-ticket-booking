@@ -7,8 +7,8 @@ const TicketForm = () => {
   const [reservationImage, setReservationImage] = useState(null);
   const [ticketImage, setTicketImage] = useState(null);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = async () => {
+  
     const formData = new FormData();
     formData.append('price', price);
     formData.append('currency', currency);
@@ -16,14 +16,19 @@ const TicketForm = () => {
     formData.append('reservationImage', reservationImage);
     formData.append('ticketImage', ticketImage);
 
-    const response = await fetch('http://localhost:5001/api/tickets', {
-      method: 'POST',
-      body: formData,
+    // const response = await fetch('http://localhost:5001/api/tickets', {
+    //   method: 'POST',
+    //   body: formData,
+    // });
+    const response = await fetch('http://localhost:5001/api/tickets/transfer', {
+      method: 'GET',
     });
 
     const result = await response.json();
     console.log(result);
   };
+
+  
 
   return (
     <form onSubmit={handleSubmit}>
@@ -73,6 +78,7 @@ const TicketForm = () => {
         />
       </div>
       <button type="submit">Create Tickets</button>
+     
     </form>
   );
 };
