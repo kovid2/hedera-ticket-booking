@@ -29,3 +29,22 @@ export const switchToHederaNetwork = async (ethereum) => {
     console.error(error);
   }
 }
+
+
+//RETURNS: Array of accounts
+export const connectToMetamask = async () => {
+  const { ethereum } = window;
+  // keep track of accounts returned
+  let accounts = [];
+  if (!ethereum) {
+    throw new Error("Metamask is not installed! Go install the extension!");
+  }
+  
+  await switchToHederaNetwork(ethereum);
+
+  accounts = await ethereum.request({
+    method: 'eth_requestAccounts',
+  });
+
+  return accounts;
+}
