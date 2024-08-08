@@ -15,7 +15,7 @@ export default function Home() {
 
   // create your client
   const myAccountId = AccountId.fromString(process.env.REACT_APP_MY_ACCOUNT_ID);
-  const myPrivateKey = PrivateKey.fromString(process.env.REACT_APP_MY_PRIVATE_KEY);
+  const myPrivateKey = PrivateKey.fromStringDer(process.env.REACT_APP_MY_PRIVATE_KEY);
 
   const client = Client.forTestnet();
   client.setOperator(myAccountId, myPrivateKey);
