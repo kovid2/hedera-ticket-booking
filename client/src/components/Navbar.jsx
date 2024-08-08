@@ -1,6 +1,5 @@
-import { AppBar, Button, Toolbar, Typography } from '@mui/material';
+
 import { useContext } from 'react';
-import HBARLogo from "../assets/hbar-logo.svg";
 import { GlobalAppContext } from '../contexts/GlobalAppContext';
 import { connectToMetamask } from '../services/metamaskService';
 
@@ -10,7 +9,9 @@ export default function NavBar() {
   const { metamaskAccountAddress, setMetamaskAccountAddress } = useContext(GlobalAppContext);
 
   const retrieveWalletAddress = async () => {
+	console.log("retrieving wallet address");
     const addresses = await connectToMetamask();
+	console.log(addresses);
     if (addresses) {
       // grab the first wallet address
       setMetamaskAccountAddress(addresses[0]);
@@ -19,27 +20,18 @@ export default function NavBar() {
   }
 
   return (
-    <AppBar
-      position="relative" color='primary'>
-      <Toolbar>
-        <img src={HBARLogo} className='hbarLogoImg' />
-        <Typography variant="h6" color="white" pl={1} noWrap>
-          Happy Building
-        </Typography>
+    <div>
+      <div>
 
-        <Button
-          variant='contained'
-          color='secondary'
-          sx={{
-            ml: 'auto'
-          }}
+        <button
+          
           onClick={retrieveWalletAddress}
         >
           {metamaskAccountAddress === "" ?
             "Connect to MetaMask" :
             `Connected to: ${metamaskAccountAddress.substring(0, 8)}...`}
-        </Button>
-      </Toolbar>
-    </AppBar>
+        </button>
+      </div>
+    </div>
   )
 }

@@ -1,8 +1,8 @@
 import { AccountId, Client, PrivateKey } from "@hashgraph/sdk";
-import { Button, Stack, Typography } from "@mui/material";
 import { useContext } from "react";
 import { GlobalAppContext } from "./contexts/GlobalAppContext";
-import { sendHbar } from './services/hederaService'
+import { sendHbarToUser , sentHbarToTreasury} from './services/hederaService'
+import NavBar from "./components/Navbar";
 
 
 export default function Home() {
@@ -15,31 +15,27 @@ export default function Home() {
 
   // create your client
   const myAccountId = AccountId.fromString(process.env.REACT_APP_MY_ACCOUNT_ID);
-  const myPrivateKey = PrivateKey.fromStringDer(process.env.REACT_APP_MY_PRIVATE_KEY);
+  const myPrivateKey = PrivateKey.fromString(process.env.REACT_APP_MY_PRIVATE_KEY);
 
   const client = Client.forTestnet();
   client.setOperator(myAccountId, myPrivateKey);
 
   return (
-    <Stack 
-      spacing={4}
-      sx={{alignItems: 'center'}}
-    >
-      <Typography
-        variant="h4"
-        color="white"
-      >
-        Let's buidl a dApp on Hedera
-      </Typography>
-      <Button
-        variant="contained"
-        color="secondary"
+    <>
+      <NavBar/>
+      <button
         onClick={() => {
-          sendHbar(client, myAccountId, AccountId.fromEvmAddress(0, 0, metamaskAccountAddress), 7, myPrivateKey)
+          sendHbarToUser(client, myAccountId, metamaskAccountAddress, 7, myPrivateKey)
         }}
       >
         Transfer HBAR to MetaMask Account
-      </Button>
-    </Stack>
+      </button>
+      <button onClick={() => {
+        sentHbarToTreasury(client, metamaskAccountAddress, myAccountId, 7, myPrivateKey)
+      }
+      }>
+        Transfer HBAR to Treasury
+      </button>
+    </>
   )
 }
