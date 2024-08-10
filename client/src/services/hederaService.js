@@ -64,11 +64,34 @@ export const sentHbarToTreasury = async (toAddress, amount) => {
     }
 }
 
+const associateToken = async (tokenId) => {
+    // send the transaction
+    // convert tokenId to contract id
+    const hash = await executeContractFunction(
+      ContractId.fromString(tokenId.toString()),
+      'associate',
+      new ContractFunctionParameterBuilder(),
+      appConfig.constants.METAMASK_GAS_LIMIT_ASSOCIATE
+    );
 
-export const transferTicketNFT = async (fromAddress, toAddress, event, client) => {
-	toAddress = EntityIdHelper.fromSolidityAddress(toAddress);
-	toAddress = AccountId.fromString(toAddress);
+    return hash;
+  }
+
+export const transferTicketNFT = async (fromAddress, toEVMAddress, event, client) => {
+
+	try{
+		
+
+	}
+	catch(e){
+
+	}
+	console.log('Transfer NFT Ticket');
+	console.log(`To evm: ${toEVMAddress}`);
+	const toAddress = AccountId.fromEvmAddress(0, 0, toEVMAddress);   
 	console.log(`to ${toAddress}`);
+	//toAddress = EntityIdHelper.fromSolidityAddress(toAddress);
+	//console.log(`to ${toAddress}`);
 	console.log(`from: ${fromAddress}`);
 	const tokenTransferTx = await new TransferTransaction()
 			//TODO: change the number to events.ticketsSold+1
