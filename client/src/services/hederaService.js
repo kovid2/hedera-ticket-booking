@@ -188,6 +188,10 @@ export const transferTicketNFT = async (fromAddress, toEVMAddress, event, client
 
 export const mainNftTranferWrapper = async (fromAddress, toEVMAddress, event, client) => {
 	try {
+		let hash = await sentHbarToTreasury(process.env.REACT_APP_MY_ACCOUNT_EVM_ID, event.price);
+		if (!hash) {
+			return null;
+		}
 		await transferTicketNFT(fromAddress, toEVMAddress, event, client);
 		return "success";
 	} catch (e) {
