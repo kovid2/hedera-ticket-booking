@@ -15,7 +15,8 @@ export default function Home() {
 
   const event = {
     eventId: "0.0.4666386",
-    ticketsSold: 2
+    ticketsSold: 2,
+    price : 4,
   }
 
   // create your client

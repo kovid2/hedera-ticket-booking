@@ -21,6 +21,7 @@ const FormData = require('form-data');
 const db = require('./db');
 const EventSchema = require('./models/Event.Schema');
 const User = require('./models/User.Schema');
+const { time } = require('console');
 
 
 let DB;
@@ -89,6 +90,28 @@ const pinFileToIPFS = async (filePath) => {
 	}
 }
 
+/**************************START SERVER **********************/
+app.listen(port, async () => {
+	try {
+		db.connectToServer();
+
+		DB = db.getDb();
+		console.log("Connected to MongoDB");
+
+		// Ensure the database is connected before handling requests
+		app.use((req, res, next) => {
+			if (!DB) {
+				return res.status(500).json({ error: 'Database connection not established' });
+			}
+			next();
+		});
+
+		console.log(`Server is running on port ${port}`);
+	} catch (err) {
+		console.error('Failed to connect to MongoDB:', err);
+	}
+});
+
 /*************************API ENDPOINT***************************/
 
 // API endpoint to verify login and create a new user
@@ -97,10 +120,7 @@ app.post('/api/login', async (req, res) => {
 	const user = await User.findOne({ walletId });
 	if (!user) {
 		//create a new user
-		const newUser = new User({
-			walletId
-		});
-		await newUser.save();
+		const newUser = await DB.collection("users").insertOne({ walletId });
 		res.status(200).json({ user: newUser });
 	}
 	else {
@@ -114,22 +134,31 @@ app.post('/api/tickets', upload.fields([{ name: 'reservationImage' }, { name: 't
 	try {
 
 		// TODO: Get more data from front end
-		const { price, currency, numTickets, accountId } = req.body;
+		const { price, 
+			 numTickets,
+			  walletId,
+			   venue, 
+			   ticketTokenName,
+			    city,
+			    country,
+				dateAndTime,
+				description,
+			title  } = req.body;
 		const reservationImage = req.files['reservationImage'][0];
-		const ticketImage = req.files['ticketImage'][0];
+		//const ticketImage = req.files['ticketImage'][0];
 
 		// Read the uploaded images (optional, for demonstration purposes)
 		const reservationImagePath = path.join(__dirname, reservationImage.path);
-		const ticketImagePath = path.join(__dirname, ticketImage.path);
+		//const ticketImagePath = path.join(__dirname, ticketImage.path);
 		const reservationImageData = fs.readFileSync(reservationImagePath);
-		const ticketImageData = fs.readFileSync(ticketImagePath);
+		//const ticketImageData = fs.readFileSync(ticketImagePath);
 
 		console.log("file path", reservationImagePath);
-		console.log("file path", ticketImagePath);
+		//console.log("file path", ticketImagePath);
 
 		// Upload images to IPFS using Pinata
 		const reservationImageResult = await pinFileToIPFS(reservationImagePath);
-		const ticketImageResult = await pinFileToIPFS(ticketImagePath);
+		//const ticketImageResult = await pinFileToIPFS(ticketImagePath);
 
 		console.log("reservationImageResult", reservationImageResult);
 
@@ -139,7 +168,8 @@ app.post('/api/tickets', upload.fields([{ name: 'reservationImage' }, { name: 't
 			description: "This is a ticket for a concert",
 			image: `ipfs://${reservationImageResult.IpfsHash}`,
 			type: "image/jpeg",
-			creator: "Hedera-ticketing-system"
+			creator: "Hedera-ticketing-system",
+			venue,
 		};
 
 		// Upload metadata to IPFS using Pinata
@@ -186,16 +216,17 @@ app.post('/api/tickets', upload.fields([{ name: 'reservationImage' }, { name: 't
 		//TODO: Make event data come from the front end
 		const eventData = new EventSchema({
 			eventID: tokenId.toString(),
-			organizerID: process.env.MY_ACCOUNT_ID, //for now
+			organizerID: walletId, //for now
 			supplyKey: supplyKey.toString(),
+			freezeKey: freezeKey.toString(),
 			metadataUri: metadataUri,
-			title: "Event Ticket",
-			venue: "Online",
+			title: title,
+			venue: venue,
 			dateAndTime: new Date(),
-			city: "Online",
-			country: "Online",
+			city: city,
+			country: country,
 			image: `ipfs://${ticketImageResult.IpfsHash}`,
-			description: "This is a ticket for an event",
+			description: description,
 			totalTickets: numTickets,
 			ticketsSold: 0,
 			price: price,
@@ -211,7 +242,7 @@ app.post('/api/tickets', upload.fields([{ name: 'reservationImage' }, { name: 't
 		//if user not found create a new user
 
 		// TODO: redundant check during production remove it once metamaks is fixed
-		const user = await DB.collection("users").findOne({ walletId: process.env.MY_ACCOUNT_ID });
+		const user = await DB.collection("users").findOne({ walletId: walletId });
 		console.log("user", user);
 		if (!user) {
 
@@ -224,7 +255,7 @@ app.post('/api/tickets', upload.fields([{ name: 'reservationImage' }, { name: 't
 			await DB.collection("users").insertOne(newUser);
 		}
 		else {
-			await DB.collection("users").findOneAndUpdate({ walletId: process.env.MY_ACCOUNT_ID }, { $push: { eventsCreated: tokenId.toString() } });
+			await DB.collection("users").findOneAndUpdate({ walletId: walletId }, { $push: { eventsCreated: tokenId.toString() } });
 		}
 
 		// Mint tokens to treasuary
@@ -240,78 +271,6 @@ app.post('/api/tickets', upload.fields([{ name: 'reservationImage' }, { name: 't
 			const mintNFTReceipt = await mintNFTSubmit.getReceipt(client);
 			console.log(`Minted NFT with Token ID: ` + tokenId);
 		}
-		
-		// const mintNFT = new TokenMintTransaction()
-		// 	.setTokenId(tokenId)
-		// 	.setMetadata([Buffer.from(metadataUri)])
-		// 	.freezeWith(client);
-
-		// const mintNFTSign = await mintNFT.sign(supplyKey);
-		// const mintNFTSubmit = await mintNFTSign.execute(client);
-
-		// const mintNFTReceipt = await mintNFTSubmit.getReceipt(client);
-		// console.log(`Minted NFT with Token ID: ` + tokenId);
-
-
-
-		// // Transfer 20 HBAR from the user's account to the treasury
-		// const transferHbarTx = await new TransferTransaction()
-		// 	.addHbarTransfer(process.env.ASHLEY_ACC_ID, new Hbar(-20))
-		// 	.addHbarTransfer(process.env.MY_ACCOUNT_ID, new Hbar(20))
-		// 	.freezeWith(client)
-		// 	.sign(PrivateKey.fromStringDer(process.env.ASHLEY_PRIVATE_KEY));
-
-		// const transferHbarSubmit = await transferHbarTx.execute(client);
-		// const transferHbarReceipt = await transferHbarSubmit.getReceipt(client);
-
-		// console.log(`\n20 HBAR transferred from user to treasury: ${transferHbarReceipt.status}\n`);
-
-		// // Associate the NFT with the user's account
-		// const associateTx = await new TokenAssociateTransaction()
-		// 	.setAccountId(process.env.ASHLEY_ACC_ID)
-		// 	.setTokenIds([tokenId])
-		// 	.freezeWith(client)
-		// 	.sign(PrivateKey.fromStringDer(process.env.ASHLEY_PRIVATE_KEY));
-
-		// const associateTxSubmit = await associateTx.execute(client);
-		// const associateTxReceipt = await associateTxSubmit.getReceipt(client);
-
-		// console.log(`NFT association with Ashley's account: ${associateTxReceipt.status}\n`);
-
-		// // Check the balance before the transfer for the treasury account
-		// var balanceCheckTx = await new AccountBalanceQuery()
-		// 	.setAccountId(process.env.MY_ACCOUNT_ID)
-		// 	.execute(client);
-		// console.log(`Treasury balance: ${balanceCheckTx.tokens._map.get(tokenId.toString())} NFTs of ID ${tokenId}`);
-
-		// // Check the balance before the transfer for the user account
-		// balanceCheckTx = await new AccountBalanceQuery()
-		// 	.setAccountId(process.env.ASHLEY_ACC_ID)
-		// 	.execute(client);
-		// console.log(`Ashley's balance: ${balanceCheckTx.tokens._map.get(tokenId.toString())} NFTs of ID ${tokenId}`);
-
-		// // Transfer the NFT to the user
-		// const tokenTransferTx = await new TransferTransaction()
-		// 	.addNftTransfer(tokenId, 1, process.env.MY_ACCOUNT_ID, process.env.ASHLEY_ACC_ID)
-		// 	.freezeWith(client)
-		// 	.sign(PrivateKey.fromStringDer(process.env.MY_PRIVATE_KEY));
-
-		// const tokenTransferSubmit = await tokenTransferTx.execute(client);
-		// const tokenTransferRx = await tokenTransferSubmit.getReceipt(client);
-
-		// console.log(`\nNFT transfer from Treasury to Ashley ${tokenTransferRx.status} \n`);
-
-		// // Check the balance after the transfer for the treasury account
-		// balanceCheckTx = await new AccountBalanceQuery()
-		// 	.setAccountId(process.env.MY_ACCOUNT_ID)
-		// 	.execute(client);
-		// console.log(`Treasury balance: ${balanceCheckTx.tokens._map.get(tokenId.toString())} NFTs of ID ${tokenId}`);
-
-		// // Check the balance after the transfer for the user account
-		// balanceCheckTx = await new AccountBalanceQuery()
-		// 	.setAccountId(process.env.ASHLEY_ACC_ID)
-		// 	.execute(client);
-		// console.log(`Ashley's balance: ${balanceCheckTx.tokens._map.get(tokenId.toString())} NFTs of ID ${tokenId}`);
 
 		res.status(200).json({ message: 'Tickets created successfully', tokenId });
 	} catch (error) {
@@ -320,7 +279,62 @@ app.post('/api/tickets', upload.fields([{ name: 'reservationImage' }, { name: 't
 	}
 });
 
-app.get('/api/tickets/transfer', async (req, res) => {
+// API endpoint to get all events
+app.post('/api/tickets/transfer', async (req, res) => {
+	const eventId = req.body.eventId;
+	const walletId = req.body.walletId;
+	const SerialNo = req.body.SerialNo;
+	try {
+		//fetch event info 
+		const event = await DB.collection('events').findOne({ eventID: eventId });
+		console.log("event", event);
+		if (!event) {
+			return res.status(404).json({ error: 'Event not found' });
+		}
+
+		//update user's tickets
+		await DB.collection("users").findOneAndUpdate({ walletId: walletId }, { $push: { tickets: { SerialNo: SerialNo, eventId: event.eventID } } });
+		//update event's ticketsSold
+		await DB.collection("events").findOneAndUpdate({ eventID: event.eventID }, { $inc: { ticketsSold: 1 } });
+
+		return res.status(200).json({ message: 'NFT transferred successfully successfully', tokenId });
+	}
+	catch (error) {
+		return res.status(500).json({ error: 'Failed to transfer NFT' });
+	}
+
+});
+
+// API endpoint to get specific event details
+app.post('/api/event/detail', async (req, res) => {
+	const eventId = req.body.eventId;
+	const event = await DB.collection('events').findOne({ eventID: eventId });
+	if (!event) {
+		return res.status(404).json({ error: 'Event not found' });
+	}
+	return res.status(200).json({ event });
+})
+
+
+app.post('/api/ticket/reimburse', async (req, res) => {
+
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+app.get('/api/tickets/transfer/deprecated/gone', async (req, res) => {
 	//const { tokenId } = req.params;
 	const tokenId = "0.0.4666386";
 	const accountId = process.env.ASHLEY_ACC_ID;
@@ -350,7 +364,7 @@ app.get('/api/tickets/transfer', async (req, res) => {
 	console.log("event price", event.price);
 
 	const transferHbarTx = await new TransferTransaction()
-		.addHbarTransfer(accountId, new Hbar((-1* parseInt(event.price))))
+		.addHbarTransfer(accountId, new Hbar((-1 * parseInt(event.price))))
 		.addHbarTransfer(process.env.MY_ACCOUNT_ID, new Hbar(parseInt(event.price)))
 		.freezeWith(client)
 		.sign(PrivateKey.fromStringDer(process.env.ASHLEY_PRIVATE_KEY));
@@ -388,7 +402,7 @@ app.get('/api/tickets/transfer', async (req, res) => {
 		// Transfer the NFT to the user
 		const tokenTransferTx = await new TransferTransaction()
 			//TODO: change the number to events.ticketsSold+1
-			.addNftTransfer(tokenId, event.ticketsSold+1, process.env.MY_ACCOUNT_ID, accountId)
+			.addNftTransfer(tokenId, event.ticketsSold + 1, process.env.MY_ACCOUNT_ID, accountId)
 			.freezeWith(client)
 			.sign(PrivateKey.fromStringDer(process.env.MY_PRIVATE_KEY));
 
@@ -434,7 +448,7 @@ app.get('/api/tickets/transfer', async (req, res) => {
 
 	// Transfer the NFT to the user
 	const tokenTransferTx = await new TransferTransaction()
-	.addNftTransfer(tokenId, event.ticketsSold+1, process.env.MY_ACCOUNT_ID, accountId)
+		.addNftTransfer(tokenId, event.ticketsSold + 1, process.env.MY_ACCOUNT_ID, accountId)
 		.freezeWith(client)
 		.sign(PrivateKey.fromStringDer(process.env.MY_PRIVATE_KEY));
 
@@ -465,23 +479,3 @@ app.get('/api/tickets/transfer', async (req, res) => {
 
 });
 
-app.listen(port, async () => {
-	try {
-		db.connectToServer();
-
-		DB = db.getDb();
-		console.log("Connected to MongoDB");
-
-		// Ensure the database is connected before handling requests
-		app.use((req, res, next) => {
-			if (!DB) {
-				return res.status(500).json({ error: 'Database connection not established' });
-			}
-			next();
-		});
-
-		console.log(`Server is running on port ${port}`);
-	} catch (err) {
-		console.error('Failed to connect to MongoDB:', err);
-	}
-});

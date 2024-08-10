@@ -14,11 +14,15 @@ const EventSchema = new mongoose.Schema({
 		type: String,
 		required: true,
 	},
+	freezeKey: {
+		type: String,
+		required: true,
+	},
 	metadataUri: {
 		type: String,
 		required: true,
 	},
-
+	
 	title: {
 		type: String,
 		required: true,
