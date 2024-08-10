@@ -28,6 +28,13 @@ let DB;
 
 const app = express();
 
+
+// Middleware to parse JSON bodies
+app.use(express.json());
+
+// Middleware to parse URL-encoded bodies (optional, if you're sending form data)
+app.use(express.urlencoded({ extended: true }));
+
 // Set up CORS
 app.use((req, res, next) => {
 	res.setHeader('Access-Control-Allow-Origin', '*');
@@ -90,27 +97,7 @@ const pinFileToIPFS = async (filePath) => {
 	}
 }
 
-/**************************START SERVER **********************/
-app.listen(port, async () => {
-	try {
-		db.connectToServer();
 
-		DB = db.getDb();
-		console.log("Connected to MongoDB");
-
-		// Ensure the database is connected before handling requests
-		app.use((req, res, next) => {
-			if (!DB) {
-				return res.status(500).json({ error: 'Database connection not established' });
-			}
-			next();
-		});
-
-		console.log(`Server is running on port ${port}`);
-	} catch (err) {
-		console.error('Failed to connect to MongoDB:', err);
-	}
-});
 
 /*************************API ENDPOINT***************************/
 
@@ -134,16 +121,16 @@ app.post('/api/tickets', upload.fields([{ name: 'reservationImage' }, { name: 't
 	try {
 
 		// TODO: Get more data from front end
-		const { price, 
-			 numTickets,
-			  walletId,
-			   venue, 
-			   ticketTokenName,
-			    city,
-			    country,
-				dateAndTime,
-				description,
-			title  } = req.body;
+		const { price,
+			numTickets,
+			walletId,
+			venue,
+			ticketTokenName,
+			city,
+			country,
+			dateAndTime,
+			description,
+			title } = req.body;
 		const reservationImage = req.files['reservationImage'][0];
 		//const ticketImage = req.files['ticketImage'][0];
 
@@ -307,20 +294,43 @@ app.post('/api/tickets/transfer', async (req, res) => {
 
 // API endpoint to get specific event details
 app.post('/api/event/detail', async (req, res) => {
-	const eventId = req.body.eventId;
-	const event = await DB.collection('events').findOne({ eventID: eventId });
-	if (!event) {
-		return res.status(404).json({ error: 'Event not found' });
+	try {
+		const eventId = req.body.eventId;
+		const event = await DB.collection('events').findOne({ eventID: eventId });
+		if (!event) {
+			return res.status(404).json({ error: 'Event not found' });
+		}
+		return res.status(200).json({ event });
 	}
-	return res.status(200).json({ event });
+	catch (error) {
+		return res.status(500).json({ error: 'Failed to get event details' });
+	}
 })
 
+//API endpoint to get user tickets
+app.post('/api/user/tickets', async (req, res) => {
+	try {
+		console.log("req.body", req.body);
+		const walletId = req.body.walletId;
+		const user = await DB.collection('users').findOne({ walletId });
+		if (!user) {
+			return res.status(404).json({ error: 'User not found' });
+		}
+		//return detail about users ticketts and events.
 
-app.post('/api/ticket/reimburse', async (req, res) => {
+		let events = [];
 
+		for (let i = 0; i < user.tickets.length; i++) {
+			const event = await DB.collection('events').findOne({ eventID: user.tickets[i].eventId });
+			events.push(event);
+		}
+		return res.status(200).json({ user, events });
+	}
+	catch (error) {
+		console.log(error);
+		return res.status(500).json({ error: 'Failed to get user tickets' });
+	}
 });
-
-
 
 
 
@@ -479,3 +489,24 @@ app.get('/api/tickets/transfer/deprecated/gone', async (req, res) => {
 
 });
 
+/**************************START SERVER **********************/
+app.listen(port, async () => {
+	try {
+		db.connectToServer();
+
+		DB = db.getDb();
+		console.log("Connected to MongoDB");
+
+		// Ensure the database is connected before handling requests
+		app.use((req, res, next) => {
+			if (!DB) {
+				return res.status(500).json({ error: 'Database connection not established' });
+			}
+			next();
+		});
+
+		console.log(`Server is running on port ${port}`);
+	} catch (err) {
+		console.error('Failed to connect to MongoDB:', err);
+	}
+});
