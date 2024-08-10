@@ -343,7 +343,6 @@ app.post('/api/user/tickets', async (req, res) => {
 
 
 
-
 app.get('/api/tickets/transfer/deprecated/gone', async (req, res) => {
 	//const { tokenId } = req.params;
 	const tokenId = "0.0.4666386";
