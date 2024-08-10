@@ -297,7 +297,14 @@ app.post('/api/tickets/transfer', async (req, res) => {
 
 });
 
-
+app.post('/api/event/detail', async (req, res) => {
+	const eventId = req.body.eventId;
+	const event = await DB.collection('events').findOne({ eventID: eventId });
+	if (!event) {
+		return res.status(404).json({ error: 'Event not found' });
+	}
+	return res.status(200).json({ event });
+})
 
 
 
