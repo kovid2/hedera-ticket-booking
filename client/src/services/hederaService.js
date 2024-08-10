@@ -69,6 +69,11 @@ export const sentHbarToTreasury = async (toAddress, amount) => {
 const executeContractFunction = async (contractId, functionName, functionParameters, gasLimit) => {
 	const provider = new ethers.providers.Web3Provider(window.ethereum);
 	const signer = await provider.getSigner();
+	console.log(`Contract ID: ${contractId}`);
+	console.log(`Function Name: ${functionName}`);
+	console.log(functionParameters);
+	console.log(`Gas Limit: ${gasLimit}`);
+
 	const abi = [
 		`function ${functionName}(${functionParameters.buildAbiFunctionParams()})`
 	];
@@ -76,6 +81,8 @@ const executeContractFunction = async (contractId, functionName, functionParamet
 	// create contract instance for the contract id
 	// to call the function, use contract[functionName](...functionParameters, ethersOverrides)
 	const contract = new ethers.Contract(`0x${contractId.toSolidityAddress()}`, abi, signer);
+
+	console.log(`Contract: ${contract}`);
 	try {
 		const txResult = await contract[functionName](
 			...functionParameters.buildEthersParams(),
@@ -83,8 +90,10 @@ const executeContractFunction = async (contractId, functionName, functionParamet
 				gasLimit: gasLimit === -1 ? undefined : gasLimit
 			}
 		);
+		console.log(txResult);
 		return txResult.hash;
 	} catch (error) {
+		console.log("worng");
 		console.warn(error.message ? error.message : error);
 		return null;
 	}
@@ -93,24 +102,23 @@ const executeContractFunction = async (contractId, functionName, functionParamet
 const associateToken = async (tokenId) => {
 	// send the transaction
 	// convert tokenId to contract id
-	const hash = await executeContractFunction(
-		ContractId.fromString(tokenId.toString()),
-		'associate',
-		new ContractFunctionParameterBuilder(),
-		process.env.REACT_APP_MY_METAMASK_GAS_LIMIT_ASSOCIATE
-	);
+	try {
+		const hash = await executeContractFunction(
+			ContractId.fromString(tokenId.toString()),
+			'associate',
+			new ContractFunctionParameterBuilder(),
+			process.env.REACT_APP_MY_METAMASK_GAS_LIMIT_ASSOCIATE
+		);
 
-	return hash;
+		return hash;
+	} catch (e) {
+		console.warn(e);
+	}
 }
 
 export const transferTicketNFT = async (fromAddress, toEVMAddress, event, client) => {
 
 	try {
-		let hash = await associateToken(event.eventId);
-		console.log(`Associate Token Hash: ${hash}`);
-
-
-
 		console.log('Transfer NFT Ticket');
 		console.log(`To evm: ${toEVMAddress}`);
 		const toAddress = AccountId.fromEvmAddress(0, 0, toEVMAddress);
@@ -130,11 +138,30 @@ export const transferTicketNFT = async (fromAddress, toEVMAddress, event, client
 		console.log(`\nNFT transfer from Treasury to Ashley ${tokenTransferRx.status} \n`);
 	}
 	catch (e) {
-		console.log(e);
+		console.warn(e.message);
 	}
 
 }
 
+export const mainNftTranferWrapper = async (fromAddress, toEVMAddress, event, client) => {
+	try {
+		await transferTicketNFT(fromAddress, toEVMAddress, event, client);
+	} catch (e) {
+		if (e.message.includes('TOKEN_NOT_ASSOCIATED_TO_ACCOUNT')) {
+			try {
+				let hash = await associateToken(event.eventId);
+				console.log(`Associate Token Hash: ${hash}`);
+				await transferTicketNFT(fromAddress, toEVMAddress, event, client);
+			}
+			catch (e) {
+				console.warn(e);
+			}
+		}
+		else {
+			console.warn(e);
+		}
+	}
+}
 const convertAccountIdToSolidityAddress = (accountId) => {
 	const accountIdString = accountId.evmAddress !== null
 		? accountId.toString()
