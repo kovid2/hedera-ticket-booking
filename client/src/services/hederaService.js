@@ -118,7 +118,6 @@ const associateToken = async (tokenId) => {
 
 export const transferTicketNFT = async (fromAddress, toEVMAddress, event, client) => {
 
-	try {
 		console.log('Transfer NFT Ticket');
 		console.log(`To evm: ${toEVMAddress}`);
 		const toAddress = AccountId.fromEvmAddress(0, 0, toEVMAddress);
@@ -128,7 +127,7 @@ export const transferTicketNFT = async (fromAddress, toEVMAddress, event, client
 		console.log(`from: ${fromAddress}`);
 		const tokenTransferTx = await new TransferTransaction()
 			//TODO: change the number to events.ticketsSold+1
-			.addNftTransfer((event.eventId), (event.ticketsSold + 1), fromAddress, toAddress)
+			.addNftTransfer((event.eventId), (event.ticketsSold + 2), fromAddress, toAddress)
 			.freezeWith(client)
 			.sign(PrivateKey.fromStringDer(process.env.REACT_APP_MY_PRIVATE_KEY));
 
@@ -136,10 +135,7 @@ export const transferTicketNFT = async (fromAddress, toEVMAddress, event, client
 		const tokenTransferRx = await tokenTransferSubmit.getReceipt(client);
 
 		console.log(`\nNFT transfer from Treasury to Ashley ${tokenTransferRx.status} \n`);
-	}
-	catch (e) {
-		console.warn(e.message);
-	}
+
 
 }
 
@@ -149,6 +145,8 @@ export const mainNftTranferWrapper = async (fromAddress, toEVMAddress, event, cl
 	} catch (e) {
 		if (e.message.includes('TOKEN_NOT_ASSOCIATED_TO_ACCOUNT')) {
 			try {
+				console.log('Token not associated to account');
+				console.log('Associating token to account');
 				let hash = await associateToken(event.eventId);
 				console.log(`Associate Token Hash: ${hash}`);
 				await transferTicketNFT(fromAddress, toEVMAddress, event, client);
@@ -158,6 +156,7 @@ export const mainNftTranferWrapper = async (fromAddress, toEVMAddress, event, cl
 			}
 		}
 		else {
+			console.log("hello i am executing");
 			console.warn(e);
 		}
 	}
