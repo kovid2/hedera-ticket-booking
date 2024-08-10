@@ -22,6 +22,7 @@ export default function Home() {
 
   return (
     <>
+    <h1>Home</h1>
       <NavBar/>
       <button
         onClick={() => {
@@ -30,6 +31,7 @@ export default function Home() {
       >
         Transfer HBAR to MetaMask Account
       </button>
+      <br></br>
       <button onClick={() => {
         sentHbarToTreasury(myAccountId, 7)
       }
