@@ -16,6 +16,7 @@ export default function Home() {
   // create your client
   const myAccountId = AccountId.fromString(process.env.REACT_APP_MY_ACCOUNT_ID);
   const myPrivateKey = PrivateKey.fromString(process.env.REACT_APP_MY_PRIVATE_KEY);
+  const myAccountEvm = process.env.REACT_APP_MY_ACCOUNT_EVM_ID;
 
   const client = Client.forTestnet();
   client.setOperator(myAccountId, myPrivateKey);
@@ -33,7 +34,7 @@ export default function Home() {
       </button>
       <br></br>
       <button onClick={() => {
-        sentHbarToTreasury(myAccountId, 7)
+        sentHbarToTreasury(myAccountEvm, 7)
       }
       }>
         Transfer HBAR to Treasury

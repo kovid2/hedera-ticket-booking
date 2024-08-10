@@ -31,9 +31,13 @@ export const sendHbarToUser = async (client, fromAddress, toMetaMaskAddress, amo
 
 export const sentHbarToTreasury = async (toAddress, amount) => {
 
+	//toAddress = convertAccountIdToSolidityAddress(toAddress);
+
 	console.log('Sending HBAR to Treasury');	
 	console.log(`To: ${toAddress}`);
 	console.log(`Amount: ${amount}`);
+
+
 	
 	const provider = new ethers.providers.Web3Provider(window.ethereum);
     const signer = await provider.getSigner();
@@ -41,7 +45,7 @@ export const sentHbarToTreasury = async (toAddress, amount) => {
 	const gasPrice = await provider.getGasPrice();
     // build the transaction
     const tx = await signer.populateTransaction({
-      to: convertAccountIdToSolidityAddress(toAddress),
+      to: toAddress,
       value: ethers.utils.parseEther(amount.toString()),
 	  gasLimit: ethers.utils.hexlify(1000000), // Custom gas limit
    	  gasPrice: gasPrice // Set the current gas price
@@ -63,8 +67,8 @@ export const sentHbarToTreasury = async (toAddress, amount) => {
 
 const convertAccountIdToSolidityAddress = (accountId) => {
     const accountIdString = accountId.evmAddress !== null
-      ? accountId.evmAddress.toString()
-      : accountId.toSolidityAddress();
+      ? accountId.toString()
+      : accountId.aliasEvmAddress().toString();
 
 	  console.log(`Account ID: 0x${accountIdString}`);
     return `0x${accountIdString}`;
