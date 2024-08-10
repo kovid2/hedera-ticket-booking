@@ -120,10 +120,7 @@ app.post('/api/login', async (req, res) => {
 	const user = await User.findOne({ walletId });
 	if (!user) {
 		//create a new user
-		const newUser = new User({
-			walletId
-		});
-		await newUser.save();
+		const newUser = await DB.collection("users").insertOne({ walletId });
 		res.status(200).json({ user: newUser });
 	}
 	else {
@@ -137,22 +134,31 @@ app.post('/api/tickets', upload.fields([{ name: 'reservationImage' }, { name: 't
 	try {
 
 		// TODO: Get more data from front end
-		const { price, currency, numTickets, accountId } = req.body;
+		const { price, 
+			 numTickets,
+			  walletId,
+			   venue, 
+			   ticketTokenName,
+			    city,
+			    country,
+				dateAndTime,
+				description,
+			title  } = req.body;
 		const reservationImage = req.files['reservationImage'][0];
-		const ticketImage = req.files['ticketImage'][0];
+		//const ticketImage = req.files['ticketImage'][0];
 
 		// Read the uploaded images (optional, for demonstration purposes)
 		const reservationImagePath = path.join(__dirname, reservationImage.path);
-		const ticketImagePath = path.join(__dirname, ticketImage.path);
+		//const ticketImagePath = path.join(__dirname, ticketImage.path);
 		const reservationImageData = fs.readFileSync(reservationImagePath);
-		const ticketImageData = fs.readFileSync(ticketImagePath);
+		//const ticketImageData = fs.readFileSync(ticketImagePath);
 
 		console.log("file path", reservationImagePath);
-		console.log("file path", ticketImagePath);
+		//console.log("file path", ticketImagePath);
 
 		// Upload images to IPFS using Pinata
 		const reservationImageResult = await pinFileToIPFS(reservationImagePath);
-		const ticketImageResult = await pinFileToIPFS(ticketImagePath);
+		//const ticketImageResult = await pinFileToIPFS(ticketImagePath);
 
 		console.log("reservationImageResult", reservationImageResult);
 
@@ -162,7 +168,8 @@ app.post('/api/tickets', upload.fields([{ name: 'reservationImage' }, { name: 't
 			description: "This is a ticket for a concert",
 			image: `ipfs://${reservationImageResult.IpfsHash}`,
 			type: "image/jpeg",
-			creator: "Hedera-ticketing-system"
+			creator: "Hedera-ticketing-system",
+			venue,
 		};
 
 		// Upload metadata to IPFS using Pinata
@@ -209,16 +216,17 @@ app.post('/api/tickets', upload.fields([{ name: 'reservationImage' }, { name: 't
 		//TODO: Make event data come from the front end
 		const eventData = new EventSchema({
 			eventID: tokenId.toString(),
-			organizerID: process.env.MY_ACCOUNT_ID, //for now
+			organizerID: walletId, //for now
 			supplyKey: supplyKey.toString(),
+			freezeKey: freezeKey.toString(),
 			metadataUri: metadataUri,
-			title: "Event Ticket",
-			venue: "Online",
+			title: title,
+			venue: venue,
 			dateAndTime: new Date(),
-			city: "Online",
-			country: "Online",
+			city: city,
+			country: country,
 			image: `ipfs://${ticketImageResult.IpfsHash}`,
-			description: "This is a ticket for an event",
+			description: description,
 			totalTickets: numTickets,
 			ticketsSold: 0,
 			price: price,
@@ -234,7 +242,7 @@ app.post('/api/tickets', upload.fields([{ name: 'reservationImage' }, { name: 't
 		//if user not found create a new user
 
 		// TODO: redundant check during production remove it once metamaks is fixed
-		const user = await DB.collection("users").findOne({ walletId: process.env.MY_ACCOUNT_ID });
+		const user = await DB.collection("users").findOne({ walletId: walletId });
 		console.log("user", user);
 		if (!user) {
 
@@ -247,7 +255,7 @@ app.post('/api/tickets', upload.fields([{ name: 'reservationImage' }, { name: 't
 			await DB.collection("users").insertOne(newUser);
 		}
 		else {
-			await DB.collection("users").findOneAndUpdate({ walletId: process.env.MY_ACCOUNT_ID }, { $push: { eventsCreated: tokenId.toString() } });
+			await DB.collection("users").findOneAndUpdate({ walletId: walletId }, { $push: { eventsCreated: tokenId.toString() } });
 		}
 
 		// Mint tokens to treasuary
@@ -297,6 +305,7 @@ app.post('/api/tickets/transfer', async (req, res) => {
 
 });
 
+// API endpoint to get specific event details
 app.post('/api/event/detail', async (req, res) => {
 	const eventId = req.body.eventId;
 	const event = await DB.collection('events').findOne({ eventID: eventId });
@@ -307,7 +316,9 @@ app.post('/api/event/detail', async (req, res) => {
 })
 
 
+app.post('/api/ticket/reimburse', async (req, res) => {
 
+});
 
 
 
