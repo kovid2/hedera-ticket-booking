@@ -63,6 +63,31 @@ export const sentHbarToTreasury = async (toAddress, amount) => {
       return null;
     }
 }
+  // Purpose: build contract execute transaction and send to hashconnect for signing and execution
+  // Returns: Promise<TransactionId | null>
+  const  executeContractFunction = async (contractId, functionName, functionParameters, gasLimit) => {
+	const provider = new ethers.providers.Web3Provider(window.ethereum);
+    const signer = await provider.getSigner();
+    const abi = [
+      `function ${functionName}(${functionParameters.buildAbiFunctionParams()})`
+    ];
+
+    // create contract instance for the contract id
+    // to call the function, use contract[functionName](...functionParameters, ethersOverrides)
+    const contract = new ethers.Contract(`0x${contractId.toSolidityAddress()}`, abi, signer);
+    try {
+      const txResult = await contract[functionName](
+        ...functionParameters.buildEthersParams(),
+        {
+          gasLimit: gasLimit === -1 ? undefined : gasLimit
+        }
+      );
+      return txResult.hash;
+    } catch (error) {
+      console.warn(error.message ? error.message : error);
+      return null;
+    }
+  }
 
 const associateToken = async (tokenId) => {
     // send the transaction
@@ -71,7 +96,7 @@ const associateToken = async (tokenId) => {
       ContractId.fromString(tokenId.toString()),
       'associate',
       new ContractFunctionParameterBuilder(),
-      appConfig.constants.METAMASK_GAS_LIMIT_ASSOCIATE
+      process.env.REACT_APP_MY_METAMASK_GAS_LIMIT_ASSOCIATE
     );
 
     return hash;
@@ -80,7 +105,7 @@ const associateToken = async (tokenId) => {
 export const transferTicketNFT = async (fromAddress, toEVMAddress, event, client) => {
 
 	try{
-		
+		await associateToken(event.eventId);
 
 	}
 	catch(e){
