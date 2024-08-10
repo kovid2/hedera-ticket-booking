@@ -9,7 +9,7 @@ const UserSchema = new mongoose.Schema({
 	tickets: [
 		{
 			// your ticket number
-			tokenId: {
+			SerialNo: {
 				type: String,
 			},
 			// what concert or event
