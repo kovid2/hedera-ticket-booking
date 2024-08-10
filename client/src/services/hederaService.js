@@ -2,6 +2,16 @@ import { AccountId, ContractId, Client, EntityIdHelper, PrivateKey, TransactionR
 import { ethers } from "ethers";
 import ContractFunctionParameterBuilder from './ContractFunctionParameterBuilder';
 
+/**
+ * PURPOSE: Send HBAR from treasury to MetaMask account
+ * @param {*} client  // Hedera Client
+ * @param {*} fromAddress // Hedera Account ID
+ * @param {*} toMetaMaskAddress  // MetaMask Address
+ * @param {*} amount // Amount of HBAR to send
+ * @param {*} operatorPrivateKey // Operator Private Key
+ * @returns {Promise<transactionReceipt>} // Transaction Receipt
+ */
+
 export const sendHbarToUser = async (client, fromAddress, toMetaMaskAddress, amount, operatorPrivateKey) => {
 
 	console.log('Sending HBAR to MetaMask account');
@@ -26,9 +36,18 @@ export const sendHbarToUser = async (client, fromAddress, toMetaMaskAddress, amo
 		.setTransactionId(transferHbarTransactionResponse.transactionId)
 		.setIncludeChildren(true)
 		.execute(client);
-
 	console.log(`Transaction Status: ${transactionReceipt.status}`);
+
+	return transactionReceipt;
+
 }
+
+/**
+ * Purpose: Send HBAR from client account to Treasury
+ * @param {*} toAddress 
+ * @param {*} amount 
+ * @returns {Promise<string | null>} transaction.hash
+ */
 
 export const sentHbarToTreasury = async (toAddress, amount) => {
 
@@ -64,8 +83,15 @@ export const sentHbarToTreasury = async (toAddress, amount) => {
 		return null;
 	}
 }
-// Purpose: build contract execute transaction and send to hashconnect for signing and execution
-// Returns: Promise<TransactionId | null>
+/**
+ * PURPOSE: build contract execute transaction and send to hashconnect for signing and execution
+ * @param {*} contractId 
+ * @param {*} functionName 
+ * @param {*} functionParameters 
+ * @param {*} gasLimit 
+ * @returns {Promise<TransactionId | null>} 
+ */
+
 const executeContractFunction = async (contractId, functionName, functionParameters, gasLimit) => {
 	const provider = new ethers.providers.Web3Provider(window.ethereum);
 	const signer = await provider.getSigner();
@@ -99,6 +125,12 @@ const executeContractFunction = async (contractId, functionName, functionParamet
 	}
 }
 
+/**
+ * PURPOSE: Associate token with account
+ * @param {*} tokenId 
+ * @returns {Promise<string | null>} hash
+ */
+
 const associateToken = async (tokenId) => {
 	// send the transaction
 	// convert tokenId to contract id
@@ -116,6 +148,14 @@ const associateToken = async (tokenId) => {
 	}
 }
 
+/**
+ * PURPOSE: Transfer NFT ticket from treasury to MetaMask account
+ * @param {*} fromAddress 
+ * @param {*} toEVMAddress 
+ * @param {*} event 
+ * @param {*} client 
+ * @returns {Promise<transactionReceipt>} 
+ */
 export const transferTicketNFT = async (fromAddress, toEVMAddress, event, client) => {
 
 		console.log('Transfer NFT Ticket');
@@ -133,15 +173,23 @@ export const transferTicketNFT = async (fromAddress, toEVMAddress, event, client
 
 		const tokenTransferSubmit = await tokenTransferTx.execute(client);
 		const tokenTransferRx = await tokenTransferSubmit.getReceipt(client);
-
 		console.log(`\nNFT transfer from Treasury to Ashley ${tokenTransferRx.status} \n`);
-
-
+		return tokenTransferRx;
 }
+
+/**
+ * PURPOSE: Wrapper function to handle token association and NFT transfer
+ * @param {*} fromAddress 
+ * @param {*} toEVMAddress 
+ * @param {*} event 
+ * @param {*} client 
+ * @returns {Promise<string | null>}
+ */
 
 export const mainNftTranferWrapper = async (fromAddress, toEVMAddress, event, client) => {
 	try {
 		await transferTicketNFT(fromAddress, toEVMAddress, event, client);
+		return "success";
 	} catch (e) {
 		if (e.message.includes('TOKEN_NOT_ASSOCIATED_TO_ACCOUNT')) {
 			try {
@@ -150,22 +198,17 @@ export const mainNftTranferWrapper = async (fromAddress, toEVMAddress, event, cl
 				let hash = await associateToken(event.eventId);
 				console.log(`Associate Token Hash: ${hash}`);
 				await transferTicketNFT(fromAddress, toEVMAddress, event, client);
+				return "success";
 			}
 			catch (e) {
 				console.warn(e);
+				return null;
 			}
 		}
 		else {
 			console.log("hello i am executing");
 			console.warn(e);
+			return null;
 		}
 	}
-}
-const convertAccountIdToSolidityAddress = (accountId) => {
-	const accountIdString = accountId.evmAddress !== null
-		? accountId.toString()
-		: accountId.aliasEvmAddress().toString();
-
-	console.log(`Account ID: 0x${accountIdString}`);
-	return `0x${accountIdString}`;
 }
