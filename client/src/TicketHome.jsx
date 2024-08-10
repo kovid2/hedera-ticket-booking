@@ -1,7 +1,7 @@
 import { AccountId, Client, PrivateKey } from "@hashgraph/sdk";
 import { useContext } from "react";
 import { GlobalAppContext } from "./contexts/GlobalAppContext";
-import { sendHbarToUser , sentHbarToTreasury} from './services/hederaService'
+import { sendHbarToUser , sentHbarToTreasury, transferTicketNFT} from './services/hederaService'
 import NavBar from "./components/Navbar";
 
 
@@ -11,6 +11,11 @@ export default function Home() {
   // If we weren't able to grab it, we should throw a new error
   if (!process.env.REACT_APP_MY_ACCOUNT_ID || !process.env.REACT_APP_MY_PRIVATE_KEY) {
     throw new Error("Environment variables REACT_APP_MY_ACCOUNT_ID and REACT_APP_MY_PRIVATE_KEY must be present");
+  }
+
+  const event = {
+    eventId: "0.0.4666386",
+    ticketsSold: 2
   }
 
   // create your client
@@ -38,6 +43,12 @@ export default function Home() {
       }
       }>
         Transfer HBAR to Treasury
+      </button>
+      <button onClick={() => {
+        transferTicketNFT(myAccountId, metamaskAccountAddress, event, client)
+      }
+      }>
+        Transfer NFT Ticket
       </button>
     </>
   )

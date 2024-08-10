@@ -1,4 +1,4 @@
-import { AccountId, Client, PrivateKey, TransactionReceiptQuery, TransferTransaction } from "@hashgraph/sdk"
+import { AccountId, Client, EntityIdHelper, PrivateKey, TransactionReceiptQuery, TransferTransaction } from "@hashgraph/sdk"
 import { ethers } from "ethers";
 
 export const sendHbarToUser = async (client, fromAddress, toMetaMaskAddress, amount, operatorPrivateKey) => {
@@ -64,6 +64,24 @@ export const sentHbarToTreasury = async (toAddress, amount) => {
     }
 }
 
+
+export const transferTicketNFT = async (fromAddress, toAddress, event, client) => {
+	toAddress = EntityIdHelper.fromSolidityAddress(toAddress);
+	toAddress = AccountId.fromString(toAddress);
+	console.log(`to ${toAddress}`);
+	console.log(`from: ${fromAddress}`);
+	const tokenTransferTx = await new TransferTransaction()
+			//TODO: change the number to events.ticketsSold+1
+		.addNftTransfer((event.eventId), (event.ticketsSold+1), fromAddress, toAddress)
+		.freezeWith(client)
+		.sign(PrivateKey.fromStringDer(process.env.REACT_APP_MY_PRIVATE_KEY));
+
+	const tokenTransferSubmit = await tokenTransferTx.execute(client);
+	const tokenTransferRx = await tokenTransferSubmit.getReceipt(client);
+
+	console.log(`\nNFT transfer from Treasury to Ashley ${tokenTransferRx.status} \n`);
+
+}
 
 const convertAccountIdToSolidityAddress = (accountId) => {
     const accountIdString = accountId.evmAddress !== null
