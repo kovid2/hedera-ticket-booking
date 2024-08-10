@@ -31,7 +31,7 @@ export default function Home() {
         Transfer HBAR to MetaMask Account
       </button>
       <button onClick={() => {
-        sentHbarToTreasury(client, metamaskAccountAddress, myAccountId, 7, myPrivateKey)
+        sentHbarToTreasury(myAccountId, 7)
       }
       }>
         Transfer HBAR to Treasury

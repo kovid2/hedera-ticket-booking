@@ -31,11 +31,11 @@ export const sendHbarToUser = async (client, fromAddress, toMetaMaskAddress, amo
 
 export const sentHbarToTreasury = async (toAddress, amount) => {
 	
-	const provider = getProvider();
+	const provider = new ethers.providers.Web3Provider(window.ethereum);
     const signer = await provider.getSigner();
     // build the transaction
     const tx = await signer.populateTransaction({
-      to: this.convertAccountIdToSolidityAddress(toAddress),
+      to: convertAccountIdToSolidityAddress(toAddress),
       value: ethers.utils.parseEther(amount.toString()),
     });
     try {
@@ -48,4 +48,13 @@ export const sentHbarToTreasury = async (toAddress, amount) => {
       console.warn(error.message ? error.message : error);
       return null;
     }
+}
+
+
+const convertAccountIdToSolidityAddress = (accountId) => {
+    const accountIdString = accountId.evmAddress !== null
+      ? accountId.evmAddress.toString()
+      : accountId.toSolidityAddress();
+
+    return `0x${accountIdString}`;
 }
