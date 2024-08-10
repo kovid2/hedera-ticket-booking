@@ -10,7 +10,7 @@ function App() {
     <div className="App">
       <h1>Hedera Ticket Booking System</h1>
       <TicketForm />
-      <MetaMaskWallet />
+    
       <TicketHome/>
     </div>
     </GlobalAppContextProvider>
