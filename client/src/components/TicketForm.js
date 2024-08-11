@@ -4,15 +4,16 @@ import { GlobalAppContext } from '../contexts/GlobalAppContext';
 import { createTickets } from '../network/api';
 
 const TicketForm = () => {
-  const [price, setPrice] = useState('');
-  const [numTickets, setNumTickets] = useState(1);
-  const [venue, setVenue] = useState('');
-  const [ticketTokenName, setTicketTokenName] = useState('');
-  const [city, setCity] = useState('');
-  const [country, setCountry] = useState('');
+  const [price, setPrice] = useState('5');
+  const [numTickets, setNumTickets] = useState(10);
+  const [venue, setVenue] = useState('Rogers');
+  const [ticketTokenName, setTicketTokenName] = useState('Maneskin');
+  const [city, setCity] = useState('Toronto');
+  const [country, setCountry] = useState('Canada');
   const [dateAndTime, setDateAndTime] = useState('');
-  const [description, setDescription] = useState('');
-  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('Maneskin concert');
+  const [title, setTitle] = useState('Maneskin Concert');
+  const [ticketImage, setTicketImage] = useState(null);
   const { metamaskAccountAddress } = useContext(GlobalAppContext);
 
   const handleSubmit = async (e) => {
@@ -29,6 +30,7 @@ const TicketForm = () => {
     formData.append('dateAndTime', dateAndTime);
     formData.append('description', description);
     formData.append('title', title);
+    formData.append('ticketImage', ticketImage);
 
     // Submit the form data to the API
     try {
@@ -123,7 +125,14 @@ const TicketForm = () => {
         />
       </div>
       
-      
+       <div>
+        <label>Ticket Image:</label>
+        <input
+          type="file"
+          onChange={(e) => setTicketImage(e.target.files[0])}
+          required
+        />
+      </div>
       <button type="submit">Create Tickets</button>
     </form>
   );
