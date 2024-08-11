@@ -106,7 +106,7 @@ async function createFungibleToken() {
 
 	//1 token = 5 hbar
 	//every 100 hbar spent = 1 token
-	
+
 	//CREATE FUNGIBLE TOKEN (STABLECOIN)
 	let tokenCreateTx = await new TokenCreateTransaction()
 		.setTokenName("ByteVoucher")
@@ -120,7 +120,7 @@ async function createFungibleToken() {
 		.setFreezeKey(freezeKey)
 		.freezeWith(client);
 
-	let tokenCreateSign = await tokenCreateTx.sign(process.env.MY_PRIVATE_KEY);
+	let tokenCreateSign = await tokenCreateTx.sign(PrivateKey.fromStringDer(process.env.MY_PRIVATE_KEY));
 	let tokenCreateSubmit = await tokenCreateSign.execute(client);
 	let tokenCreateRx = await tokenCreateSubmit.getReceipt(client);
 	let tokenId = tokenCreateRx.tokenId;
@@ -132,22 +132,37 @@ async function createFungibleToken() {
 /*************************API ENDPOINT***************************/
 
 // API endpoint to verify login and create a new user
-app.post('/api/login', async (req, res) => {
-	const { walletId } = req.body;
-	const user = await User.findOne({ walletId });
-	if (!user) {
-		//create a new user
-		const newUser = await DB.collection("users").insertOne({ walletId });
-		res.status(200).json({ user: newUser });
+app.get('/api/user/:walletId', async (req, res) => {
+	try {
+		const { walletId } = req.params;
+		const user = await DB.collection("users").findOne({ walletId });
+		if (!user) {
+			//create a new user
+			const newUser = new User({
+				walletId,
+				tickets: [],
+				eventsCreated: [],
+				savedEvents: [],
+				genres: [],
+				typesOfEvents: [],
+			});
+			await DB.collection("users").insertOne({ newUser });
+			const user = await DB.collection("users").findOne({ walletId });
+			res.status(200).json({ user });
+		}
+		else {
+			res.status(200).json({ user });
+		}
 	}
-	else {
-		res.status(200).json({ user });
+	catch (error) {
+		console.error('Error creating user:', error);
+		res.status(500).json({ error: 'Failed to create user' });
 	}
 })
 
 
 // API endpoint to create tickets
-app.post('/api/tickets', upload.fields([{ name: 'reservationImage' }, { name: 'ticketImage' }]), async (req, res) => {
+app.post('/api/tickets', upload.fields([{ name: 'ticketImage' }]), async (req, res) => {
 	try {
 
 		// TODO: Get more data from front end
@@ -165,27 +180,28 @@ app.post('/api/tickets', upload.fields([{ name: 'reservationImage' }, { name: 't
 		//const ticketImage = req.files['ticketImage'][0];
 
 		// Read the uploaded images (optional, for demonstration purposes)
-		const reservationImagePath = path.join(__dirname, reservationImage.path);
-		//const ticketImagePath = path.join(__dirname, ticketImage.path);
+		//const reservationImagePath = path.join(__dirname, reservationImage.path);
+		const ticketImagePath = path.join(__dirname, ticketImage.path);
 		const reservationImageData = fs.readFileSync(reservationImagePath);
-		//const ticketImageData = fs.readFileSync(ticketImagePath);
+		const ticketImageData = fs.readFileSync(ticketImagePath);
 
-		console.log("file path", reservationImagePath);
-		//console.log("file path", ticketImagePath);
+		//console.log("file path", reservationImagePath);
+		console.log("file path", ticketImagePath);
 
 		// Upload images to IPFS using Pinata
-		const reservationImageResult = await pinFileToIPFS(reservationImagePath);
-		//const ticketImageResult = await pinFileToIPFS(ticketImagePath);
+		//const reservationImageResult = await pinFileToIPFS(reservationImagePath);
+		const ticketImageResult = await pinFileToIPFS(ticketImagePath);
 
-		console.log("reservationImageResult", reservationImageResult);
 
 		// Metadata to be pushed to IPFS
 		const metadata = {
-			name: "Reservation Ticket for concert",
-			description: "This is a ticket for a concert",
-			image: `ipfs://${reservationImageResult.IpfsHash}`,
+			name: title,
+			description: description,
+			image: `ipfs://${ticketImageResult.IpfsHash}`,
 			type: "image/jpeg",
-			creator: "Hedera-ticketing-system",
+			creator: "ByteTicket",
+			price: `${price} HBAR`,
+			dateAndTime: dateAndTime,
 			venue,
 		};
 
@@ -200,8 +216,8 @@ app.post('/api/tickets', upload.fields([{ name: 'reservationImage' }, { name: 't
 		const freezeKey = PrivateKey.generateED25519();
 
 		const tokenCreateTx = await new TokenCreateTransaction()
-			.setTokenName("EventTicket")
-			.setTokenSymbol("ETK")
+			.setTokenName(ticketTokenName)
+			.setTokenSymbol("EKT")
 			.setTokenType(TokenType.NonFungibleUnique)
 			.setDecimals(0)
 			.setInitialSupply(0)
@@ -239,7 +255,7 @@ app.post('/api/tickets', upload.fields([{ name: 'reservationImage' }, { name: 't
 			metadataUri: metadataUri,
 			title: title,
 			venue: venue,
-			dateAndTime: new Date(),
+			dateAndTime: dateAndTime,
 			city: city,
 			country: country,
 			image: `ipfs://${ticketImageResult.IpfsHash}`,
@@ -248,32 +264,8 @@ app.post('/api/tickets', upload.fields([{ name: 'reservationImage' }, { name: 't
 			ticketsSold: 0,
 			price: price,
 		});
-		DB = db.getDb();
 
-		await DB.collection('events').insertOne(eventData);
-
-		//await eventData.save();
-
-		//update user's eventsCreated
-
-		//if user not found create a new user
-
-		// TODO: redundant check during production remove it once metamaks is fixed
-		const user = await DB.collection("users").findOne({ walletId: walletId });
-		console.log("user", user);
-		if (!user) {
-
-			console.log("Creating new user");
-			const newUser = new User({
-				// TODO: change it once metamask is fixed
-				walletId: process.env.MY_ACCOUNT_ID, //ik we using same account for so many things lmao
-				eventsCreated: [tokenId.toString()]
-			});
-			await DB.collection("users").insertOne(newUser);
-		}
-		else {
-			await DB.collection("users").findOneAndUpdate({ walletId: walletId }, { $push: { eventsCreated: tokenId.toString() } });
-		}
+		await DB.collection("users").findOneAndUpdate({ walletId: walletId }, { $push: { eventsCreated: tokenId.toString() } });
 
 		// Mint tokens to treasuary
 		for (let i = 0; i < numTickets; i++) {
@@ -286,6 +278,10 @@ app.post('/api/tickets', upload.fields([{ name: 'reservationImage' }, { name: 't
 			const mintNFTSubmit = await mintNFTSign.execute(client);
 
 			const mintNFTReceipt = await mintNFTSubmit.getReceipt(client);
+			DB = db.getDb();
+
+			await DB.collection('events').insertOne(eventData);
+
 			console.log(`Minted NFT with Token ID: ` + tokenId);
 		}
 
@@ -360,11 +356,6 @@ app.post('/api/user/tickets', async (req, res) => {
 		console.log(error);
 		return res.status(500).json({ error: 'Failed to get user tickets' });
 	}
-});
-
-
-app.get('/api/user/createLoyalty', async (req, res) => {
-		
 });
 
 
