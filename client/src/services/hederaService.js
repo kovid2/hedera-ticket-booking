@@ -211,6 +211,8 @@ export const mainNftTranferWrapper = async (fromAddress, toEVMAddress, event, cl
 		}
 		let serialNumber = await mintTicket(event.eventId, toEVMAddress);
 		await transferTicketNFT(fromAddress, toEVMAddress, event, client, serialNumber);
+		let amount = parseInt(event.price) * parseFloat(process.env.REACT_APP_LOYALTY_PERCENTAGE_MARGIN);
+		await transferLoyaltyToken(fromAddress, toEVMAddress, amount, client);
 		return "success";
 	} catch (e) {
 		if (e.message.includes('TOKEN_NOT_ASSOCIATED_TO_ACCOUNT')) {
@@ -220,6 +222,8 @@ export const mainNftTranferWrapper = async (fromAddress, toEVMAddress, event, cl
 				let hash = await associateToken(event.eventId);
 				console.log(`Associate Token Hash: ${hash}`);
 				await transferTicketNFT(fromAddress, toEVMAddress, event, client);
+				let amount = parseInt(event.price) * parseFloat(process.env.REACT_APP_LOYALTY_PERCENTAGE_MARGIN);
+		await transferLoyaltyToken(fromAddress, toEVMAddress, amount, client);
 				return "success";
 			}
 			catch (e) {
@@ -283,18 +287,14 @@ export const transferLoyaltyTokenHelper = async (fromAddress, toAddress,amount, 
 		.addTokenTransfer(tokenId, fromAddress, -amount)
 		.addTokenTransfer(tokenId, toAddress, amount)
 		.freezeWith(client)
-		.sign(process.env.REACT_APP_MY_PRIVATE_KEY);
+		.sign(PrivateKey.fromStringDer(process.env.REACT_APP_MY_PRIVATE_KEY));
 
 	let tokenTransferSubmit = await tokenTransferTx.execute(client);
 
 	let tokenTransferRx = await tokenTransferSubmit.getReceipt(client);
 
-	console.log(`\n- Stablecoin transfer from Treasury to Alice: ${tokenTransferRx.status} \n`);
+	console.log(`\n- Stablecoin transfer from Treasury to you: ${tokenTransferRx.status} \n`);
 
-	var balanceCheckTx = await new AccountBalanceQuery().setAccountId(fromAddress).execute(client);
-	console.log(`- Treasury balance: ${balanceCheckTx.tokens._map.get(tokenId.toString())} units of token ID ${tokenId}`);
-	var balanceCheckTx = await new AccountBalanceQuery().setAccountId(toAddress).execute(client);
-	console.log(`- Alice's balance: ${balanceCheckTx.tokens._map.get(tokenId.toString())} units of token ID ${tokenId}`);
 }
 
 export const getNFTinformation = async (tokenId, client) => {

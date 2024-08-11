@@ -1,7 +1,7 @@
 import { AccountId, Client, PrivateKey } from "@hashgraph/sdk";
 import { useContext } from "react";
 import { GlobalAppContext } from "./contexts/GlobalAppContext";
-import { getNFTinformation, mainNftTranferWrapper, sendHbarToUser , sentHbarToTreasury, transferTicketNFT} from './services/hederaService'
+import { getNFTinformation, mainNftTranferWrapper, sendHbarToUser , sentHbarToTreasury, transferLoyaltyToken, transferTicketNFT} from './services/hederaService'
 import NavBar from "./components/Navbar";
 export let client;
 
@@ -58,6 +58,11 @@ export default  function Home() {
       }
       }>
         Get NFT info
+      </button>
+      <button onClick={() => {
+        transferLoyaltyToken( myAccountId, metamaskAccountAddress, 7, client)
+      }}>
+      transfer loyalty
       </button>
     </>
   )
