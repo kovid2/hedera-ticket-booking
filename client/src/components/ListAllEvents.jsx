@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { fetchAllTicketsFromDb } from '../network/api';
 import './ListAllEvents.css';  // Assuming you will create a CSS file for styling
+import { mainNftTranferWrapper } from '../services/hederaService';
 
 export default function ListAllEvents() {
     const [events, setEvents] = useState([]);
@@ -14,8 +15,9 @@ export default function ListAllEvents() {
         }
     }
 
-    const buyTicket = (event) => {
+    const buyTicket = async(event) => {
         alert(`Buying ticket for ${event.title}`);
+        await mainNftTranferWrapper(event.ID);
     }
 
     return (

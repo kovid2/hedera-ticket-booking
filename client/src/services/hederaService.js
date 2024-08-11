@@ -12,6 +12,7 @@ import {
 } from "@hashgraph/sdk"
 import { ethers } from "ethers";
 import ContractFunctionParameterBuilder from './ContractFunctionParameterBuilder';
+import { mintTicket } from "../network/api";
 
 /**
  * PURPOSE: Send HBAR from treasury to MetaMask account
@@ -167,7 +168,7 @@ const associateToken = async (tokenId) => {
  * @param {*} client 
  * @returns {Promise<transactionReceipt>} 
  */
-export const transferTicketNFT = async (fromAddress, toEVMAddress, event, client) => {
+export const transferTicketNFT = async (fromAddress, toEVMAddress, event, client, serialNo) => {
 
 	console.log('Transfer NFT Ticket');
 	console.log(`To evm: ${toEVMAddress}`);
@@ -177,8 +178,8 @@ export const transferTicketNFT = async (fromAddress, toEVMAddress, event, client
 	//console.log(`to ${toAddress}`);
 	console.log(`from: ${fromAddress}`);
 	const tokenTransferTx = await new TransferTransaction()
-		//TODO: change the number to events.ticketsSold+1
-		.addNftTransfer((event.eventId), (event.ticketsSold + 2), fromAddress, toAddress)
+	
+		.addNftTransfer((event.eventId), (serialNo), fromAddress, toAddress)
 		.freezeWith(client)
 		.sign(PrivateKey.fromStringDer(process.env.REACT_APP_MY_PRIVATE_KEY));
 
@@ -202,11 +203,13 @@ export const transferTicketNFT = async (fromAddress, toEVMAddress, event, client
 
 export const mainNftTranferWrapper = async (fromAddress, toEVMAddress, event, client) => {
 	try {
+		
 		let hash = await sentHbarToTreasury(process.env.REACT_APP_MY_ACCOUNT_EVM_ID, event.price);
 		if (!hash) {
 			return null;
 		}
-		await transferTicketNFT(fromAddress, toEVMAddress, event, client);
+		let serialNumber = await mintTicket(event.eventId, toEVMAddress);
+		await transferTicketNFT(fromAddress, toEVMAddress, event, client, serialNumber);
 		return "success";
 	} catch (e) {
 		if (e.message.includes('TOKEN_NOT_ASSOCIATED_TO_ACCOUNT')) {

@@ -3,9 +3,9 @@ import { useContext } from "react";
 import { GlobalAppContext } from "./contexts/GlobalAppContext";
 import { getNFTinformation, mainNftTranferWrapper, sendHbarToUser , sentHbarToTreasury, transferTicketNFT} from './services/hederaService'
 import NavBar from "./components/Navbar";
+export let client;
 
-
-export default function Home() {
+export default  function Home() {
   const { metamaskAccountAddress } = useContext(GlobalAppContext);
 
   // If we weren't able to grab it, we should throw a new error
@@ -24,7 +24,7 @@ export default function Home() {
   const myPrivateKey = PrivateKey.fromString(process.env.REACT_APP_MY_PRIVATE_KEY);
   const myAccountEvm = process.env.REACT_APP_MY_ACCOUNT_EVM_ID;
 
-  const client = Client.forTestnet();
+   client = Client.forTestnet();
   client.setOperator(myAccountId, myPrivateKey);
 
   return (
