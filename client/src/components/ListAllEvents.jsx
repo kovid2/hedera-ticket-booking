@@ -28,7 +28,7 @@ export default function ListAllEvents() {
                         <div key={event.ID} className="event-row">
                             <span><strong>Title:</strong> {event.title}</span>
                             <span><strong>Description:</strong> {event.description}</span>
-                            <span><strong>Price:</strong> {event.price}</span>
+                            <span><strong>Price:</strong> {event.price} Hbar</span>
                             <span><strong>Venue:</strong> {`${event.venue}, ${event.city}, ${event.country}`}</span>
                             <button onClick={() => buyTicket(event)}>Buy Ticket</button>
                         </div>

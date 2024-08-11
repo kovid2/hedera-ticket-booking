@@ -42,7 +42,7 @@ const TicketForm = () => {
 
   return (
     <form onSubmit={handleSubmit}>
-    <div>
+      <div>
         <label>Title:</label>
         <input
           type="text"
@@ -78,15 +78,24 @@ const TicketForm = () => {
         />
       </div>
       <div>
-        <label>Number of Tickets:</label>
+        <label>Number of Tickets (must be below 10):</label>
         <input
           type="number"
           value={numTickets}
-          onChange={(e) => setNumTickets(e.target.value)}
+          onChange={(e) => {
+            const value = parseInt(e.target.value, 10);
+            if (value > 0 && value < 10) {
+              setNumTickets(value);
+            } else {
+              alert("Number of tickets must be between 1 and 9.");
+            }
+          }}
           min="1"
+          max="10"
           required
         />
       </div>
+
       <div>
         <label>Venue:</label>
         <input
@@ -124,8 +133,8 @@ const TicketForm = () => {
           required
         />
       </div>
-      
-       <div>
+
+      <div>
         <label>Ticket Image:</label>
         <input
           type="file"

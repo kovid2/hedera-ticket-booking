@@ -1,5 +1,6 @@
 .events-container {
     margin-top: 20px;
+	margin-right: 20%;
 }
 
 .event-row {
@@ -15,4 +16,5 @@
 
 .event-row button {
     margin-left: auto; /* Push the button to the far right */
+
 }

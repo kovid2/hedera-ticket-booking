@@ -1,6 +1,5 @@
 import React from 'react';
 import TicketForm from './components/TicketForm';
-import { MetaMaskWallet } from './components/MetaMaskWallet';
 import TicketHome from './TicketHome';
 import { GlobalAppContextProvider } from './contexts/GlobalAppContext';
 import ListAllEvents from './components/ListAllEvents';
