@@ -9,3 +9,13 @@ export const fetchUser = async (accountId) => {
 	return null;
   }
 }
+
+export const createTickets = async (formData) => {
+  try {
+	const res = await axios.post('/api/tickets', formData);
+	return res.data;
+  } catch (e) {
+	console.warn(e);
+	return null;
+  }
+}

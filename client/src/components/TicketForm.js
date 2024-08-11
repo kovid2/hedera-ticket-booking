@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { useContext } from 'react';
+import { GlobalAppContext } from '../contexts/GlobalAppContext';
 
 const TicketForm = () => {
   const [price, setPrice] = useState('');
@@ -6,7 +8,7 @@ const TicketForm = () => {
   const [numTickets, setNumTickets] = useState(1);
   const [reservationImage, setReservationImage] = useState(null);
   const [ticketImage, setTicketImage] = useState(null);
-
+  const { metamaskAccountAddress } = useContext(GlobalAppContext);
   const handleSubmit = async () => {
   
     const formData = new FormData();
