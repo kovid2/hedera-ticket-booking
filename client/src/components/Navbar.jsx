@@ -2,6 +2,7 @@
 import { useContext } from 'react';
 import { GlobalAppContext } from '../contexts/GlobalAppContext';
 import { connectToMetamask } from '../services/metamaskService';
+import { fetchUser } from '../network/api';
 
 
 export default function NavBar() {
@@ -15,6 +16,8 @@ export default function NavBar() {
     if (addresses) {
       // grab the first wallet address
       setMetamaskAccountAddress(addresses[0]);
+      let res = await fetchUser(addresses[0]);
+      console.log(res);
       console.log(addresses[0]);
     }
   }

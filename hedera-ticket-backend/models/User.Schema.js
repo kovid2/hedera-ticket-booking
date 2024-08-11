@@ -33,9 +33,11 @@ const UserSchema = new mongoose.Schema({
 	}],
 	city: {
 		type: String,
+		default: '',
 	},
 	country: {
 		type: String,
+		default: '',
 	},
 
 	timestampCreated: {

@@ -1,37 +1,65 @@
 import React, { useState } from 'react';
+import { useContext } from 'react';
+import { GlobalAppContext } from '../contexts/GlobalAppContext';
+import { createTickets } from '../network/api';
+
 
 const TicketForm = () => {
-  const [price, setPrice] = useState('');
-  const [currency, setCurrency] = useState('HBAR');
-  const [numTickets, setNumTickets] = useState(1);
-  const [reservationImage, setReservationImage] = useState(null);
+  const [price, setPrice] = useState('5');
+  const [numTickets, setNumTickets] = useState(10);
+  const [venue, setVenue] = useState('Rogers');
+  const [ticketTokenName, setTicketTokenName] = useState('Maneskin');
+  const [city, setCity] = useState('Toronto');
+  const [country, setCountry] = useState('Canada');
+  const [dateAndTime, setDateAndTime] = useState('');
+  const [description, setDescription] = useState('Maneskin concert');
+  const [title, setTitle] = useState('Maneskin Concert');
   const [ticketImage, setTicketImage] = useState(null);
+  const { metamaskAccountAddress } = useContext(GlobalAppContext);
 
-  const handleSubmit = async () => {
-  
+  const handleSubmit = async (e) => {
+    e.preventDefault(); // Prevent the default form submission
+
     const formData = new FormData();
     formData.append('price', price);
-    formData.append('currency', currency);
     formData.append('numTickets', numTickets);
-    formData.append('reservationImage', reservationImage);
+    formData.append('walletId', metamaskAccountAddress);
+    formData.append('venue', venue);
+    formData.append('ticketTokenName', ticketTokenName);
+    formData.append('city', city);
+    formData.append('country', country);
+    formData.append('dateAndTime', dateAndTime);
+    formData.append('description', description);
+    formData.append('title', title);
     formData.append('ticketImage', ticketImage);
 
-    // const response = await fetch('http://localhost:5001/api/tickets', {
-    //   method: 'POST',
-    //   body: formData,
-    // });
-    const response = await fetch('http://localhost:5001/api/tickets/transfer', {
-      method: 'GET',
-    });
-
-    const result = await response.json();
-    console.log(result);
+    // Submit the form data to the API
+    try {
+      const res = await createTickets(formData);
+    } catch (error) {
+      console.error('Error submitting form:', error);
+    }
   };
-
-  
 
   return (
     <form onSubmit={handleSubmit}>
+      <div>
+        <label>Title:</label>
+        <input
+          type="text"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          required
+        />
+      </div>
+      <div>
+        <label>Description:</label>
+        <textarea
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          required
+        />
+      </div>
       <div>
         <label>Price:</label>
         <input
@@ -42,33 +70,71 @@ const TicketForm = () => {
         />
       </div>
       <div>
-        <label>Currency:</label>
-        <select
-          value={currency}
-          onChange={(e) => setCurrency(e.target.value)}
-        >
-          <option value="HBAR">HBAR</option>
-          <option value="ETH">ETH</option>
-        </select>
+        <label>Ticket Token Name:</label>
+        <input
+          type="text"
+          value={ticketTokenName}
+          onChange={(e) => setTicketTokenName(e.target.value)}
+          required
+        />
       </div>
       <div>
-        <label>Number of Tickets:</label>
+        <label>Number of Tickets (must be below 10):</label>
         <input
           type="number"
           value={numTickets}
-          onChange={(e) => setNumTickets(e.target.value)}
+          onChange={(e) => {
+            const value = parseInt(e.target.value, 10);
+            if (value > 0 && value < 10) {
+              setNumTickets(value);
+            } else {
+              alert("Number of tickets must be between 1 and 9.");
+            }
+          }}
           min="1"
+          max="10"
+          required
+        />
+      </div>
+
+      <div>
+        <label>Venue:</label>
+        <input
+          type="text"
+          value={venue}
+          onChange={(e) => setVenue(e.target.value)}
+          required
+        />
+      </div>
+
+      <div>
+        <label>City:</label>
+        <input
+          type="text"
+          value={city}
+          onChange={(e) => setCity(e.target.value)}
           required
         />
       </div>
       <div>
-        <label>Reservation Image:</label>
+        <label>Country:</label>
         <input
-          type="file"
-          onChange={(e) => setReservationImage(e.target.files[0])}
+          type="text"
+          value={country}
+          onChange={(e) => setCountry(e.target.value)}
           required
         />
       </div>
+      <div>
+        <label>Date and Time:</label>
+        <input
+          type="datetime-local"
+          value={dateAndTime}
+          onChange={(e) => setDateAndTime(e.target.value)}
+          required
+        />
+      </div>
+
       <div>
         <label>Ticket Image:</label>
         <input
@@ -77,8 +143,7 @@ const TicketForm = () => {
           required
         />
       </div>
-      <button type="submit">Create Tickets</button>
-     
+      <button class="form" type="submit">Create Tickets</button>
     </form>
   );
 };

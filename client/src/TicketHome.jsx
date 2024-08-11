@@ -1,7 +1,7 @@
 import { AccountId, Client, PrivateKey } from "@hashgraph/sdk";
 import { useContext } from "react";
 import { GlobalAppContext } from "./contexts/GlobalAppContext";
-import { mainNftTranferWrapper, sendHbarToUser , sentHbarToTreasury, transferTicketNFT} from './services/hederaService'
+import { getNFTinformation, mainNftTranferWrapper, sendHbarToUser , sentHbarToTreasury, transferTicketNFT} from './services/hederaService'
 import NavBar from "./components/Navbar";
 
 
@@ -14,8 +14,8 @@ export default function Home() {
   }
 
   const event = {
-    eventId: "0.0.4666386",
-    ticketsSold: 2,
+    eventId: "0.0.4672972",
+    ticketsSold: 4,
     price : 4,
   }
 
@@ -45,11 +45,19 @@ export default function Home() {
       }>
         Transfer HBAR to Treasury
       </button>
+      <br></br>
       <button onClick={() => {
         mainNftTranferWrapper(myAccountId, metamaskAccountAddress, event, client)
       }
       }>
         Transfer NFT Ticket
+      </button>
+      <br></br>
+      <button onClick={() => {
+        getNFTinformation(event.eventId, client)
+      }
+      }>
+        Get NFT info
       </button>
     </>
   )

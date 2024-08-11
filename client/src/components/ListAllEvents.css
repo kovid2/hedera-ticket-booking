@@ -1,0 +1,20 @@
+.events-container {
+    margin-top: 20px;
+	margin-right: 20%;
+}
+
+.event-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    flex-wrap: wrap; /* Allows wrapping if the content is too wide */
+}
+
+.event-row span {
+    margin-right: 20px;
+}
+
+.event-row button {
+    margin-left: auto; /* Push the button to the far right */
+
+}
