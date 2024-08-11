@@ -3,6 +3,7 @@ import { useContext } from 'react';
 import { GlobalAppContext } from '../contexts/GlobalAppContext';
 import { createTickets } from '../network/api';
 
+
 const TicketForm = () => {
   const [price, setPrice] = useState('5');
   const [numTickets, setNumTickets] = useState(10);
@@ -142,7 +143,7 @@ const TicketForm = () => {
           required
         />
       </div>
-      <button type="submit">Create Tickets</button>
+      <button class="form" type="submit">Create Tickets</button>
     </form>
   );
 };
