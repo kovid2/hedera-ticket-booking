@@ -24,7 +24,8 @@ export const createTickets = async (formData) => {
 export const fetchAllTicketsFromDb = async () => {
 	  try {
 	const res = await axios.get(`${URL}/api/tickets/all`);
-	return res.data;
+	console.log(res.data);
+	return res.data.events;
   } catch (e) {
 	console.warn(e);
 	return null;
