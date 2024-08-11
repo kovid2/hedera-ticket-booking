@@ -1,4 +1,14 @@
-import { AccountId, ContractId, Client, EntityIdHelper, PrivateKey, TransactionReceiptQuery, TransferTransaction } from "@hashgraph/sdk"
+import {
+	AccountId,
+	ContractId,
+	TokenInfoQuery,
+	TokenFreezeTransaction,
+	Client,
+	EntityIdHelper,
+	PrivateKey,
+	TransactionReceiptQuery,
+	TransferTransaction
+} from "@hashgraph/sdk"
 import { ethers } from "ethers";
 import ContractFunctionParameterBuilder from './ContractFunctionParameterBuilder';
 
@@ -158,23 +168,23 @@ const associateToken = async (tokenId) => {
  */
 export const transferTicketNFT = async (fromAddress, toEVMAddress, event, client) => {
 
-		console.log('Transfer NFT Ticket');
-		console.log(`To evm: ${toEVMAddress}`);
-		const toAddress = AccountId.fromEvmAddress(0, 0, toEVMAddress);
-		console.log(`to ${toAddress}`);
-		//toAddress = EntityIdHelper.fromSolidityAddress(toAddress);
-		//console.log(`to ${toAddress}`);
-		console.log(`from: ${fromAddress}`);
-		const tokenTransferTx = await new TransferTransaction()
-			//TODO: change the number to events.ticketsSold+1
-			.addNftTransfer((event.eventId), (event.ticketsSold + 2), fromAddress, toAddress)
-			.freezeWith(client)
-			.sign(PrivateKey.fromStringDer(process.env.REACT_APP_MY_PRIVATE_KEY));
+	console.log('Transfer NFT Ticket');
+	console.log(`To evm: ${toEVMAddress}`);
+	const toAddress = AccountId.fromEvmAddress(0, 0, toEVMAddress);
+	console.log(`to ${toAddress}`);
+	//toAddress = EntityIdHelper.fromSolidityAddress(toAddress);
+	//console.log(`to ${toAddress}`);
+	console.log(`from: ${fromAddress}`);
+	const tokenTransferTx = await new TransferTransaction()
+		//TODO: change the number to events.ticketsSold+1
+		.addNftTransfer((event.eventId), (event.ticketsSold + 2), fromAddress, toAddress)
+		.freezeWith(client)
+		.sign(PrivateKey.fromStringDer(process.env.REACT_APP_MY_PRIVATE_KEY));
 
-		const tokenTransferSubmit = await tokenTransferTx.execute(client);
-		const tokenTransferRx = await tokenTransferSubmit.getReceipt(client);
-		console.log(`\nNFT transfer from Treasury to Ashley ${tokenTransferRx.status} \n`);
-		return tokenTransferRx;
+	const tokenTransferSubmit = await tokenTransferTx.execute(client);
+	const tokenTransferRx = await tokenTransferSubmit.getReceipt(client);
+	console.log(`\nNFT transfer from Treasury to Ashley ${tokenTransferRx.status} \n`);
+	return tokenTransferRx;
 }
 
 /**
@@ -215,4 +225,50 @@ export const mainNftTranferWrapper = async (fromAddress, toEVMAddress, event, cl
 			return null;
 		}
 	}
+}
+
+
+
+export const getNFTinformation = async (tokenId, client) => {
+	const query = new TokenInfoQuery()
+		.setTokenId(tokenId);
+
+	//Sign with the client operator private key, submit the query to the network and get the token supply
+	const res = (await query.execute(client));
+	console.log(res);
+
+}
+
+export const getFreezeKey = async (tokenId, client) => {
+	const query = new TokenInfoQuery()
+		.setTokenId(tokenId);
+
+	//Sign with the client operator private key, submit the query to the network and get the token supply
+	const res = (await query.execute(client)).freezeKey.toString();
+	return res;
+}
+
+const freezeToken = async (tokenId, freezeKey, client, accountId) => {
+	//Freeze an account from transferring a token
+	const transaction = await new TokenFreezeTransaction()
+		.setAccountId(accountId)
+		.setTokenId(tokenId)
+		.freezeWith(client);
+
+	//Sign with the freeze key of the token 
+	const signTx = await transaction.sign(freezeKey);
+
+	//Submit the transaction to a Hedera network    
+	const txResponse = await signTx.execute(client);
+
+	//Request the receipt of the transaction
+	const receipt = await txResponse.getReceipt(client);
+
+	//Get the transaction consensus status
+	const transactionStatus = receipt.status;
+
+	console.log("The transaction consensus status " + transactionStatus.toString());
+
+	//v2.0.7
+
 }
