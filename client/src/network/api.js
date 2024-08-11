@@ -61,3 +61,13 @@ export const updateDbAfterNftTransfer = async (eventId, walletId, serialNo) => {
 		return null;
 	}
 }
+
+export const fetchAllUserTickets = async (accountId) => {
+	try {
+		const res = await axios.get(`${URL}/api/user/ticket/${accountId}`);
+		return res.data;
+	} catch (e) {
+		console.warn(e);
+		return null;
+	}
+}
