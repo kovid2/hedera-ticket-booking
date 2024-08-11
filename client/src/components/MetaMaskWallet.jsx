@@ -8,6 +8,7 @@ import {
     TransferTransaction,
     AccountBalanceQuery
 } from '@hashgraph/sdk';
+import { fetchUser } from '../network/api';
 
 
 // Ensure environment variables are defined
@@ -41,6 +42,7 @@ export const MetaMaskWallet = () => {
         if (typeof window.ethereum !== 'undefined') {
             await requestAccount();
         }
+        let res = fetchUser(walletAddress);
     }
 
     const buyTicket = async () => {
