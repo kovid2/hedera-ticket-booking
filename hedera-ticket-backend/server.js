@@ -98,6 +98,36 @@ const pinFileToIPFS = async (filePath) => {
 }
 
 
+//create loyalty token
+async function createFungibleToken() {
+
+	const supplyKey = PrivateKey.generate();
+	const freezeKey = PrivateKey.generateED25519();
+
+	//1 token = 5 hbar
+	//every 100 hbar spent = 1 token
+	
+	//CREATE FUNGIBLE TOKEN (STABLECOIN)
+	let tokenCreateTx = await new TokenCreateTransaction()
+		.setTokenName("ByteVoucher")
+		.setTokenSymbol("BV")
+		.setTokenType(TokenType.FungibleCommon)
+		.setDecimals(2)
+		.setInitialSupply(1000000)
+		.setTreasuryAccountId(process.env.MY_ACCOUNT_ID)
+		.setSupplyType(TokenSupplyType.Infinite)
+		.setSupplyKey(supplyKey)
+		.setFreezeKey(freezeKey)
+		.freezeWith(client);
+
+	let tokenCreateSign = await tokenCreateTx.sign(process.env.MY_PRIVATE_KEY);
+	let tokenCreateSubmit = await tokenCreateSign.execute(client);
+	let tokenCreateRx = await tokenCreateSubmit.getReceipt(client);
+	let tokenId = tokenCreateRx.tokenId;
+	console.log(`- Created token with ID: ${tokenId} \n`);
+	return tokenId;
+}
+
 
 /*************************API ENDPOINT***************************/
 
@@ -333,6 +363,9 @@ app.post('/api/user/tickets', async (req, res) => {
 });
 
 
+app.get('/api/user/createLoyalty', async (req, res) => {
+		
+});
 
 
 
