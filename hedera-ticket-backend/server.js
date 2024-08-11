@@ -15,7 +15,8 @@ const {
 	TransferTransaction,
 	AccountBalanceQuery,
 	TokenCreateTransaction,
-	TokenAssociateTransaction, } = require('@hashgraph/sdk');
+	TokenAssociateTransaction,
+	TokenInfoQuery, } = require('@hashgraph/sdk');
 require('dotenv').config();
 const FormData = require('form-data');
 const db = require('./db');
@@ -261,7 +262,7 @@ app.post('/api/tickets', upload.fields([{ name: 'ticketImage' }]), async (req, r
 		await DB.collection("users").findOneAndUpdate({ walletId: walletId }, { $push: { eventsCreated: tokenId.toString() } });
 
 		// Mint tokens to treasuary
-		for (let i = 0; i < numTickets; i++) {
+		for (let i = 0; i < numTickets-2; i++) {
 			const mintNFT = new TokenMintTransaction()
 				.setTokenId(tokenId)
 				.setMetadata([Buffer.from(metadataUri)])
@@ -287,10 +288,10 @@ app.post('/api/tickets', upload.fields([{ name: 'ticketImage' }]), async (req, r
 });
 
 // API endpoint to get all events
-app.post('/api/tickets/transfer', async (req, res) => {
+app.post('/api/tickets/buy', async (req, res) => {
 	const eventId = req.body.eventId;
 	const walletId = req.body.walletId;
-	const SerialNo = req.body.SerialNo;
+	const SerialNo = req.body.serialNo;
 	try {
 		//fetch event info 
 		const event = await DB.collection('events').findOne({ eventID: eventId });
@@ -366,6 +367,21 @@ app.get('/api/tickets/all', async (req, res) => {
 
 
 
+app.post ('/api/tickets/mint', async (req, res) => {
+	const { tokenId, accountId } = req.body;
+	try{
+		let query = new TokenInfoQuery()
+			.setTokenId(tokenId);
+	
+		//Sign with the client operator private key, submit the query to the network and get the token supply
+		const totalSupply = (await query.execute(client)).totalSupply.toString();
+		
+		}
+		catch(e){
+			console.warn(e);
+		}
+	
+});
 
 
 

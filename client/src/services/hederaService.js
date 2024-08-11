@@ -7,7 +7,8 @@ import {
 	EntityIdHelper,
 	PrivateKey,
 	TransactionReceiptQuery,
-	TransferTransaction
+	TransferTransaction,
+	AccountInfoQuery
 } from "@hashgraph/sdk"
 import { ethers } from "ethers";
 import ContractFunctionParameterBuilder from './ContractFunctionParameterBuilder';
@@ -224,10 +225,10 @@ export const mainNftTranferWrapper = async (fromAddress, toEVMAddress, event, cl
 		}
 		else {
 			console.log("hello i am executing");
-			try{
-			await freezeToken(event.eventId, client, AccountId.fromEvmAddress(0, 0, toEVMAddress));
+			try {
+				await freezeToken(event.eventId, client, AccountId.fromEvmAddress(0, 0, toEVMAddress));
 			}
-			catch(e){
+			catch (e) {
 				console.warn(e);
 			}
 			console.warn(e);
@@ -239,12 +240,18 @@ export const mainNftTranferWrapper = async (fromAddress, toEVMAddress, event, cl
 
 
 export const getNFTinformation = async (tokenId, client) => {
-	const query = new TokenInfoQuery()
+	try{
+	let query = new TokenInfoQuery()
 		.setTokenId(tokenId);
 
 	//Sign with the client operator private key, submit the query to the network and get the token supply
-	const res = (await query.execute(client)).supplyKey.toString();
+	const res = (await query.execute(client)).totalSupply.toString();
+	
 	console.log(res);
+	}
+	catch(e){
+		console.warn(e);
+	}
 
 }
 
@@ -258,7 +265,7 @@ export const getFreezeKey = async (tokenId, client) => {
 	return res;
 }
 
-const freezeToken = async (tokenId,  client, accountId) => {
+const freezeToken = async (tokenId, client, accountId) => {
 
 	//Freeze an account from transferring a token
 	const transaction = await new TokenFreezeTransaction()

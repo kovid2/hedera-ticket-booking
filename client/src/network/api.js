@@ -31,3 +31,23 @@ export const fetchAllTicketsFromDb = async () => {
 	return null;
   }
 }
+
+export const buyTicket = async (ticketId, accountId, serialNo) => {
+  try {
+	const res = await axios.post(`${URL} `, { ticketId, accountId, serialNo });
+	return res.data;
+  } catch (e) {
+	console.warn(e);
+	return null;
+  }
+}
+
+export const mintTicket = async (ticketId, accountId) => {
+	  try {
+	const res = await axios.post(`${URL}/api/tickets/mint`, { ticketId, accountId });
+	return res.data;
+  } catch (e) {
+	console.warn(e);
+	return null;
+  }
+}
