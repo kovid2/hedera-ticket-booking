@@ -261,20 +261,20 @@ app.post('/api/tickets', upload.fields([{ name: 'ticketImage' }]), async (req, r
 
 		await DB.collection("users").findOneAndUpdate({ walletId: walletId }, { $push: { eventsCreated: tokenId.toString() } });
 
-		// Mint tokens to treasuary
-		for (let i = 0; i < numTickets-2; i++) {
-			const mintNFT = new TokenMintTransaction()
-				.setTokenId(tokenId)
-				.setMetadata([Buffer.from(metadataUri)])
-				.freezeWith(client);
+		// // Mint tokens to treasuary
+		// for (let i = 0; i < numTickets-2; i++) {
+		// 	const mintNFT = new TokenMintTransaction()
+		// 		.setTokenId(tokenId)
+		// 		.setMetadata([Buffer.from(metadataUri)])
+		// 		.freezeWith(client);
 
-			const mintNFTSign = await mintNFT.sign(supplyKey);
-			const mintNFTSubmit = await mintNFTSign.execute(client);
+		// 	const mintNFTSign = await mintNFT.sign(supplyKey);
+		// 	const mintNFTSubmit = await mintNFTSign.execute(client);
 
-			const mintNFTReceipt = await mintNFTSubmit.getReceipt(client);
+		// 	const mintNFTReceipt = await mintNFTSubmit.getReceipt(client);
 
-			console.log(`Minted NFT with Token ID: ` + tokenId);
-		}
+		// 	console.log(`Minted NFT with Token ID: ` + tokenId);
+		// }
 
 		DB = db.getDb();
 
@@ -370,12 +370,21 @@ app.get('/api/tickets/all', async (req, res) => {
 app.post ('/api/tickets/mint', async (req, res) => {
 	const { tokenId, accountId } = req.body;
 	try{
-		let query = new TokenInfoQuery()
-			.setTokenId(tokenId);
-	
-		//Sign with the client operator private key, submit the query to the network and get the token supply
-		const totalSupply = (await query.execute(client)).totalSupply.toString();
-		
+		//fetch event info
+		const event = await DB.collection('events').findOne({
+			eventID: tokenId
+		});
+		const mintNFT = new TokenMintTransaction()
+				.setTokenId(tokenId)
+				.setMetadata([Buffer.from(event.metadataUri)])
+				.freezeWith(client);
+
+			const mintNFTSign = await mintNFT.sign(event.supplyKey);
+			const mintNFTSubmit = await mintNFTSign.execute(client);
+
+			const mintNFTReceipt = await mintNFTSubmit.getReceipt(client);
+
+			console.log(`Minted NFT with Token ID: ` + tokenId);
 		}
 		catch(e){
 			console.warn(e);
