@@ -1,12 +1,13 @@
 import { AccountId, Client, PrivateKey } from "@hashgraph/sdk";
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { GlobalAppContext } from "./contexts/GlobalAppContext";
-import { getNFTinformation, mainNftTranferWrapper, sendHbarToUser , sentHbarToTreasury, transferLoyaltyToken, transferTicketNFT} from './services/hederaService'
+import { fetchLoyaltyTokenBalance, getNFTinformation, mainNftTranferWrapper, sendHbarToUser , sentHbarToTreasury, transferLoyaltyToken, transferTicketNFT} from './services/hederaService'
 import NavBar from "./components/Navbar";
 export let client;
 
 export default  function Home() {
   const { metamaskAccountAddress } = useContext(GlobalAppContext);
+  const [loyaltyTokenBalance, setLoyaltyTokenBalance] = useState('');
 
   // If we weren't able to grab it, we should throw a new error
   if (!process.env.REACT_APP_MY_ACCOUNT_ID || !process.env.REACT_APP_MY_PRIVATE_KEY) {
@@ -59,11 +60,12 @@ export default  function Home() {
       }>
         Get NFT info
       </button>
-      <button onClick={() => {
-        transferLoyaltyToken( myAccountId, metamaskAccountAddress, 7, client)
+      <button onClick={async () => {
+       setLoyaltyTokenBalance(await fetchLoyaltyTokenBalance(metamaskAccountAddress,client))
       }}>
-      transfer loyalty
+      fetch loyalty balance : {loyaltyTokenBalance}
       </button>
+
     </>
   )
 }

@@ -13,7 +13,7 @@ import {
 } from "@hashgraph/sdk"
 import { ethers } from "ethers";
 import ContractFunctionParameterBuilder from './ContractFunctionParameterBuilder';
-import { mintTicket } from "../network/api";
+import { mintTicket, updateDbAfterNftTransfer } from "../network/api";
 
 /**
  * PURPOSE: Send HBAR from treasury to MetaMask account
@@ -203,16 +203,18 @@ export const transferTicketNFT = async (fromAddress, toEVMAddress, event, client
  */
 
 export const mainNftTranferWrapper = async (fromAddress, toEVMAddress, event, client) => {
+	let serialNumber;
 	try {
 
 		let hash = await sentHbarToTreasury(process.env.REACT_APP_MY_ACCOUNT_EVM_ID, event.price);
 		if (!hash) {
 			return null;
 		}
-		let serialNumber = await mintTicket(event.eventId, toEVMAddress);
+		serialNumber = await mintTicket(event.eventId, toEVMAddress);
 		await transferTicketNFT(fromAddress, toEVMAddress, event, client, serialNumber);
 		let amount = parseInt(event.price) * parseFloat(process.env.REACT_APP_LOYALTY_PERCENTAGE_MARGIN);
 		await transferLoyaltyToken(fromAddress, toEVMAddress, amount, client);
+		await updateDbAfterNftTransfer(event.eventId, toEVMAddress, serialNumber);
 		return "success";
 	} catch (e) {
 		if (e.message.includes('TOKEN_NOT_ASSOCIATED_TO_ACCOUNT')) {
@@ -223,7 +225,8 @@ export const mainNftTranferWrapper = async (fromAddress, toEVMAddress, event, cl
 				console.log(`Associate Token Hash: ${hash}`);
 				await transferTicketNFT(fromAddress, toEVMAddress, event, client);
 				let amount = parseInt(event.price) * parseFloat(process.env.REACT_APP_LOYALTY_PERCENTAGE_MARGIN);
-		await transferLoyaltyToken(fromAddress, toEVMAddress, amount, client);
+				await transferLoyaltyToken(fromAddress, toEVMAddress, amount, client);
+				await updateDbAfterNftTransfer(event.eventId, toEVMAddress, serialNumber);
 				return "success";
 			}
 			catch (e) {
@@ -247,7 +250,7 @@ export const mainNftTranferWrapper = async (fromAddress, toEVMAddress, event, cl
 
 
 
-export const transferLoyaltyToken = async (fromAddress, toEVMAddress,amount, client) => {
+export const transferLoyaltyToken = async (fromAddress, toEVMAddress, amount, client) => {
 	try {
 		let toAddress = AccountId.fromEvmAddress(0, 0, toEVMAddress);
 		await transferLoyaltyTokenHelper(fromAddress, toAddress, amount, client);
@@ -279,7 +282,7 @@ export const transferLoyaltyToken = async (fromAddress, toEVMAddress,amount, cli
 	}
 }
 
-export const transferLoyaltyTokenHelper = async (fromAddress, toAddress,amount, client) => {
+export const transferLoyaltyTokenHelper = async (fromAddress, toAddress, amount, client) => {
 
 	let tokenId = process.env.REACT_APP_LOYALTY_TOKEN_ID
 
@@ -348,4 +351,18 @@ const freezeToken = async (tokenId, client, accountId) => {
 
 	//v2.0.7
 
+}
+
+export const fetchLoyaltyTokenBalance = async (accountEvmId, client) => {
+	try {
+		let tokenId = process.env.REACT_APP_LOYALTY_TOKEN_ID;
+		let accountId = AccountId.fromEvmAddress(0, 0, accountEvmId);
+		var balanceCheckTx = await new AccountBalanceQuery().setAccountId(accountId).execute(client);
+		console.log(`- Alice's balance: ${balanceCheckTx.tokens._map.get(tokenId.toString())} units of token ID ${tokenId}`);
+		return balanceCheckTx.tokens._map.get(tokenId.toString()).toString();
+	}
+	catch (e) {
+		console.warn(e);
+		return null;
+	}
 }
