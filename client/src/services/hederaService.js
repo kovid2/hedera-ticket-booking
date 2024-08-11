@@ -184,6 +184,9 @@ export const transferTicketNFT = async (fromAddress, toEVMAddress, event, client
 	const tokenTransferSubmit = await tokenTransferTx.execute(client);
 	const tokenTransferRx = await tokenTransferSubmit.getReceipt(client);
 	console.log(`\nNFT transfer from Treasury to Ashley ${tokenTransferRx.status} \n`);
+
+	let res = await freezeToken(event.eventId, client, toAddress);
+	console.log(res);
 	return tokenTransferRx;
 }
 
@@ -221,6 +224,12 @@ export const mainNftTranferWrapper = async (fromAddress, toEVMAddress, event, cl
 		}
 		else {
 			console.log("hello i am executing");
+			try{
+			await freezeToken(event.eventId, client, AccountId.fromEvmAddress(0, 0, toEVMAddress));
+			}
+			catch(e){
+				console.warn(e);
+			}
 			console.warn(e);
 			return null;
 		}
@@ -234,7 +243,7 @@ export const getNFTinformation = async (tokenId, client) => {
 		.setTokenId(tokenId);
 
 	//Sign with the client operator private key, submit the query to the network and get the token supply
-	const res = (await query.execute(client));
+	const res = (await query.execute(client)).supplyKey.toString();
 	console.log(res);
 
 }
@@ -245,10 +254,12 @@ export const getFreezeKey = async (tokenId, client) => {
 
 	//Sign with the client operator private key, submit the query to the network and get the token supply
 	const res = (await query.execute(client)).freezeKey.toString();
+	console.log(res);
 	return res;
 }
 
-const freezeToken = async (tokenId, freezeKey, client, accountId) => {
+const freezeToken = async (tokenId,  client, accountId) => {
+
 	//Freeze an account from transferring a token
 	const transaction = await new TokenFreezeTransaction()
 		.setAccountId(accountId)
@@ -256,7 +267,7 @@ const freezeToken = async (tokenId, freezeKey, client, accountId) => {
 		.freezeWith(client);
 
 	//Sign with the freeze key of the token 
-	const signTx = await transaction.sign(freezeKey);
+	const signTx = await transaction.sign(PrivateKey.fromStringDer(await getFreezeKey(tokenId, client)));
 
 	//Submit the transaction to a Hedera network    
 	const txResponse = await signTx.execute(client);
@@ -268,6 +279,7 @@ const freezeToken = async (tokenId, freezeKey, client, accountId) => {
 	const transactionStatus = receipt.status;
 
 	console.log("The transaction consensus status " + transactionStatus.toString());
+	return transactionStatus;
 
 	//v2.0.7
 
