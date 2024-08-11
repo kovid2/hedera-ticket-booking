@@ -353,6 +353,17 @@ app.post('/api/user/tickets', async (req, res) => {
 });
 
 
+//API endpoint to get all events from DB
+app.get('/api/tickets/all', async (req, res) => {
+	try {
+		const events = await DB.collection('events').find({}).toArray();
+		return res.status(200).json({ events });
+	}
+	catch (error) {
+		return res.status(500).json({ error: 'Failed to get events' });
+	}
+});
+
 
 
 
