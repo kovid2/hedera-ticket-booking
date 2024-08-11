@@ -20,3 +20,13 @@ export const createTickets = async (formData) => {
 	return null;
   }
 }
+
+export const fetchAllTicketsFromDb = async () => {
+	  try {
+	const res = await axios.get(`${URL}/api/tickets/all`);
+	return res.data;
+  } catch (e) {
+	console.warn(e);
+	return null;
+  }
+}

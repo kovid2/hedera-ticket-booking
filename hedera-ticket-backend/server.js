@@ -146,7 +146,7 @@ app.get('/api/user/:walletId', async (req, res) => {
 				genres: [],
 				typesOfEvents: [],
 			});
-			await DB.collection("users").insertOne({ newUser });
+			await DB.collection("users").insertOne(newUser );
 			const user = await DB.collection("users").findOne({ walletId });
 			res.status(200).json({ user });
 		}
@@ -176,13 +176,12 @@ app.post('/api/tickets', upload.fields([{ name: 'ticketImage' }]), async (req, r
 			dateAndTime,
 			description,
 			title } = req.body;
-		const reservationImage = req.files['reservationImage'][0];
-		//const ticketImage = req.files['ticketImage'][0];
+	//	const reservationImage = req.files['reservationImage'][0];
+		const ticketImage = req.files['ticketImage'][0];
 
 		// Read the uploaded images (optional, for demonstration purposes)
 		//const reservationImagePath = path.join(__dirname, reservationImage.path);
 		const ticketImagePath = path.join(__dirname, ticketImage.path);
-		const reservationImageData = fs.readFileSync(reservationImagePath);
 		const ticketImageData = fs.readFileSync(ticketImagePath);
 
 		//console.log("file path", reservationImagePath);
@@ -238,13 +237,7 @@ app.post('/api/tickets', upload.fields([{ name: 'ticketImage' }]), async (req, r
 		const maxTransactionFee = new Hbar(20);
 
 		const metadataUri = `ipfs://${metadataResult.IpfsHash}`;
-		//const metadataLink = `${process.env.PINATA_URL}/ipfs/${metadataResult.IpfsHash}`;
-
-		//const shortenedMetadataLink = await shortenURL(metadataLink);
-
-		// if (Buffer.byteLength(shortenedMetadataLink) > 100) {
-		// 	throw new Error('Metadata too long even after shortening ' + Buffer.byteLength(shortenedMetadataLink));
-		// }
+	
 
 		//TODO: Make event data come from the front end
 		const eventData = new EventSchema({
@@ -278,12 +271,13 @@ app.post('/api/tickets', upload.fields([{ name: 'ticketImage' }]), async (req, r
 			const mintNFTSubmit = await mintNFTSign.execute(client);
 
 			const mintNFTReceipt = await mintNFTSubmit.getReceipt(client);
-			DB = db.getDb();
-
-			await DB.collection('events').insertOne(eventData);
 
 			console.log(`Minted NFT with Token ID: ` + tokenId);
 		}
+
+		DB = db.getDb();
+
+		await DB.collection('events').insertOne(eventData);
 
 		res.status(200).json({ message: 'Tickets created successfully', tokenId });
 	} catch (error) {
