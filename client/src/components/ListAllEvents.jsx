@@ -1,4 +1,4 @@
-import React, { useState,useContext } from 'react'
+import React, { useState, useContext } from 'react'
 import { fetchAllTicketsFromDb } from '../network/api';
 import './ListAllEvents.css';  // Assuming you will create a CSS file for styling
 import { mainNftTranferWrapper } from '../services/hederaService';
@@ -13,11 +13,13 @@ const myAccountId = AccountId.fromString(process.env.REACT_APP_MY_ACCOUNT_ID);
 export default function ListAllEvents() {
     const {metamaskAccountAddress} = useContext(GlobalAppContext);
     const [events, setEvents] = useState([]);
+   
 
     const fetchAllEvents = async () => {
         let res = await fetchAllTicketsFromDb();
         if (Array.isArray(res)) {
             setEvents(res);
+          
         } else {
             console.error("Fetched data is not an array:", res);
         }

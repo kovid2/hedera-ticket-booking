@@ -42,10 +42,11 @@ export const buyTicket = async (ticketId, accountId, serialNo) => {
 	}
 }
 
-export const mintTicket = async (ticketId, accountId) => {
+export const mintTicket = async (tokenId, accountId) => {
 	try {
-		const res = await axios.post(`${URL}/api/tickets/mint`, { ticketId, accountId });
-		return res.data;
+		const res = await axios.post(`${URL}/api/tickets/mint`, { tokenId, accountId });
+		console.log(res.data);
+		return res.data.res1;
 	} catch (e) {
 		console.warn(e);
 		return null;
@@ -65,6 +66,7 @@ export const updateDbAfterNftTransfer = async (eventId, walletId, serialNo) => {
 export const fetchAllUserTickets = async (accountId) => {
 	try {
 		const res = await axios.get(`${URL}/api/user/ticket/${accountId}`);
+		console.log(res.data);
 		return res.data;
 	} catch (e) {
 		console.warn(e);

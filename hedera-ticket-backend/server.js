@@ -113,7 +113,7 @@ async function createFungibleToken() {
 		.setTokenName("ByteVoucher")
 		.setTokenSymbol("BV")
 		.setTokenType(TokenType.FungibleCommon)
-		.setDecimals(2)
+		.setDecimals(0)
 		.setInitialSupply(1000000)
 		.setTreasuryAccountId(process.env.MY_ACCOUNT_ID)
 		.setSupplyType(TokenSupplyType.Infinite)
@@ -305,9 +305,10 @@ app.post('/api/tickets/buy', async (req, res) => {
 		//update event's ticketsSold
 		await DB.collection("events").findOneAndUpdate({ eventID: event.eventID }, { $inc: { ticketsSold: 1 } });
 
-		return res.status(200).json({ message: 'NFT transferred successfully successfully', tokenId });
+		return res.status(200).json({ message: 'NFT transferred successfully successfully' });
 	}
 	catch (error) {
+		console.error('Error buying tickets:', error);
 		return res.status(500).json({ error: 'Failed to transfer NFT' });
 	}
 
@@ -329,10 +330,9 @@ app.post('/api/event/detail', async (req, res) => {
 })
 
 //API endpoint to get user tickets
-app.post('/api/user/tickets', async (req, res) => {
+app.get('/api/user/ticket/:walletId', async (req, res) => {
 	try {
-		console.log("req.body", req.body);
-		const walletId = req.body.walletId;
+		const walletId = req.params.walletId;
 		const user = await DB.collection('users').findOne({ walletId });
 		if (!user) {
 			return res.status(404).json({ error: 'User not found' });
@@ -378,16 +378,27 @@ app.post ('/api/tickets/mint', async (req, res) => {
 				.setTokenId(tokenId)
 				.setMetadata([Buffer.from(event.metadataUri)])
 				.freezeWith(client);
+			console.log(event);
 
-			const mintNFTSign = await mintNFT.sign(event.supplyKey);
+			const mintNFTSign = await mintNFT.sign(PrivateKey.fromStringED25519(event.supplyKey));
 			const mintNFTSubmit = await mintNFTSign.execute(client);
 
 			const mintNFTReceipt = await mintNFTSubmit.getReceipt(client);
 
 			console.log(`Minted NFT with Token ID: ` + tokenId);
+
+			//Get total supply
+			let query = new TokenInfoQuery()
+				.setTokenId(tokenId);
+			
+			//Sign with the client operator private key, submit the query to the network and get the token supply
+			const res1 = (await query.execute(client)).totalSupply.toString();
+			
+			res.status(200).json({ message: 'NFT minted successfully', res1 });
 		}
 		catch(e){
 			console.warn(e);
+			res.status(500).json({ error: 'Failed to mint NFT' });
 		}
 	
 });
