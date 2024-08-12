@@ -3,6 +3,7 @@ import TicketForm from './components/TicketForm';
 import TicketHome from './TicketHome';
 import { GlobalAppContextProvider } from './contexts/GlobalAppContext';
 import ListAllEvents from './components/ListAllEvents';
+import ListAllUserTickets from './components/ListAllUserTickets';
 
 function App() {
   return (
@@ -12,6 +13,7 @@ function App() {
       <TicketForm />
       <TicketHome/>
       <ListAllEvents />
+      <ListAllUserTickets />
     </div>
     </GlobalAppContextProvider>
   );
