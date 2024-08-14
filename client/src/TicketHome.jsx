@@ -4,6 +4,10 @@ import { GlobalAppContext } from "./contexts/GlobalAppContext";
 import { fetchLoyaltyTokenBalance, getNFTinformation, mainNftTranferWrapper, sendHbarToUser , sentHbarToTreasury, transferLoyaltyToken, transferTicketNFT} from './services/hederaService'
 import NavBar from "./components/Navbar/Navbar";
 import SearchBar from "./components/SearchBar/SearchBar";
+import Banner from "./components/Banner/Banner";
+
+import Clancy from './assets/clancy.png';
+
 export let client;
 
 export default  function Home() {
@@ -33,6 +37,7 @@ export default  function Home() {
     <>
       <NavBar/>
       <SearchBar/>
+      <Banner image={Clancy} eventName='Clancy' eventOrganizer='Twenty One Pilots'/>
       <button
         onClick={() => {
           sendHbarToUser(client, myAccountId, metamaskAccountAddress, 7, myPrivateKey)
