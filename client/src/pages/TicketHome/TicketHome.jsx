@@ -10,6 +10,7 @@ import NavBar from "../../components/Navbar/Navbar";
 import SearchBar from "../../components/SearchBar/SearchBar";
 import Banner from "../../components/Banner/Banner";
 import ListAllEvents from "../../components/ListAllEvents/ListAllEvents";
+import Footer from "../../components/Footer/Footer";
 
 import Clancy from '../../assets/clancy.png';
 
@@ -55,6 +56,8 @@ export default  function Home() {
         <ListAllEvents/>
 
       </div>
+
+      <Footer/>
 
 
 

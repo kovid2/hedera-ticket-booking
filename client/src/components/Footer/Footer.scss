@@ -1,0 +1,34 @@
+@use '/src/utilities/variables' as var;
+
+.footer {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    height: 136px;
+    background-color: var.$GS600;
+    color: var.$GS100;
+    margin-top: 100px;
+    text-decoration: none;
+    
+    .footer-container {
+        display: flex;
+        width: 100%;
+        margin-left: 180px;
+        margin-right: 180px;
+
+        img {
+            width: 100px;
+            height: 100px;
+        }
+    }
+}
+
+.divider {
+    width: 100%;
+    height: 1px;
+    margin-top: 80px;
+    margin-bottom: 19px;
+    background: var.$GS100;
+}
+
+
