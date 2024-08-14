@@ -45,7 +45,7 @@ export default  function Home() {
       <SearchBar/>
       <Banner image={Clancy} eventName='Clancy' eventOrganizer='Twenty One Pilots'/>
 
-      <div className="divider"></div>
+      <div className="divider-screen"></div>
 
       <div className="home-content">
 
