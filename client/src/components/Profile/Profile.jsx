@@ -11,6 +11,8 @@ import user from '../../assets/userBlack.svg';
 import x from '../../assets/xCloseGreen.svg';
 import metamask from '../../assets/metaMaskLogo.png';
 
+import TextButton from '../TextButton/TextButton';
+
 export default function Profile({ toggleProfile }) {
     // use the GlobalAppContext to keep track of the metamask account connection
     const { metamaskAccountAddress, setMetamaskAccountAddress } = useContext(GlobalAppContext);
@@ -52,9 +54,7 @@ export default function Profile({ toggleProfile }) {
 
                     <div className="profile-content">
                         <img src={metamask} alt="metamask" />
-                        <button onClick={retrieveWalletAddress}>
-                            {metamaskAccountAddress === "" ? " " : `Connected to: ${metamaskAccountAddress.substring(0, 8)}...`}
-                        </button>
+                        <TextButton text={metamaskAccountAddress === "" ? "CONNECT METAMASK WALLET" : `CONNECTED TO: ${metamaskAccountAddress.substring(0, 8)}...`} onClick={retrieveWalletAddress} />
                     </div>
                 </div>
             </div>  
