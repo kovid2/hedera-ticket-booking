@@ -1,0 +1,50 @@
+@use './variables' as var;
+
+
+h1 {
+    color: var.$GS550;
+    font-family: Helvetica;
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 115.87%; /* 23.174px */
+}
+
+.divider {
+    width: auto;
+    height: 1px;
+    margin: 0 144px;
+    margin-top: 31px;
+    margin-bottom: 19px;
+    background: var.$GS300;
+}
+
+
+.line-accent {
+    width: 72px;
+    height: 4px;
+    flex-shrink: 0;
+    border-radius: 10px;
+    margin-top: -5px;
+    background: var.$green;
+}
+
+
+.events-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(367px, 1fr));
+    gap: 26px;
+    margin: 0 144px;
+    margin-bottom: 50px;
+}
+
+//home page
+
+.home-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-left: 144px;
+    margin-right: 144px;
+    width: auto;
+}
