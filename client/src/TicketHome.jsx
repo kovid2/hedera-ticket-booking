@@ -3,6 +3,7 @@ import { useContext, useState } from "react";
 import { GlobalAppContext } from "./contexts/GlobalAppContext";
 import { fetchLoyaltyTokenBalance, getNFTinformation, mainNftTranferWrapper, sendHbarToUser , sentHbarToTreasury, transferLoyaltyToken, transferTicketNFT} from './services/hederaService'
 import NavBar from "./components/Navbar/Navbar";
+import SearchBar from "./components/SearchBar/SearchBar";
 export let client;
 
 export default  function Home() {
@@ -31,6 +32,7 @@ export default  function Home() {
   return (
     <>
       <NavBar/>
+      <SearchBar/>
       <button
         onClick={() => {
           sendHbarToUser(client, myAccountId, metamaskAccountAddress, 7, myPrivateKey)
