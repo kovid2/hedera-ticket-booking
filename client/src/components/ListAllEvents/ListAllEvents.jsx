@@ -6,7 +6,7 @@ import { GlobalAppContext } from "../../contexts/GlobalAppContext";
 import { AccountId, Client, PrivateKey } from "@hashgraph/sdk";
 import { client
 
- } from '../../pages/TicketHome';
+ } from '../../pages/TicketHome/TicketHome';
 
  import EventCard from '../EventCard/EventCard';
 const myAccountEvm = process.env.REACT_APP_MY_ACCOUNT_EVM_ID;

@@ -1,16 +1,17 @@
 import { AccountId, Client, PrivateKey } from "@hashgraph/sdk";
 import { useContext, useState } from "react";
-import { GlobalAppContext } from "../contexts/GlobalAppContext";
-import { fetchLoyaltyTokenBalance, getNFTinformation, mainNftTranferWrapper, sendHbarToUser , sentHbarToTreasury, transferLoyaltyToken, transferTicketNFT} from '../services/hederaService'
+import { GlobalAppContext } from "../../contexts/GlobalAppContext";
+import { fetchLoyaltyTokenBalance, getNFTinformation, mainNftTranferWrapper, sendHbarToUser , sentHbarToTreasury, transferLoyaltyToken, transferTicketNFT} from '../../services/hederaService'
 
-import '../utilities/globals.scss';
+import '../../utilities/globals.scss';
+import './TicketHome.scss';
 
-import NavBar from "../components/Navbar/Navbar";
-import SearchBar from "../components/SearchBar/SearchBar";
-import Banner from "../components/Banner/Banner";
-import ListAllEvents from "../components/ListAllEvents/ListAllEvents";
+import NavBar from "../../components/Navbar/Navbar";
+import SearchBar from "../../components/SearchBar/SearchBar";
+import Banner from "../../components/Banner/Banner";
+import ListAllEvents from "../../components/ListAllEvents/ListAllEvents";
 
-import Clancy from '../assets/clancy.png';
+import Clancy from '../../assets/clancy.png';
 
 export let client;
 

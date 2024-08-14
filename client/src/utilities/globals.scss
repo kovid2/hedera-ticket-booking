@@ -29,22 +29,3 @@ h1 {
     background: var.$green;
 }
 
-
-.events-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(367px, 1fr));
-    gap: 26px;
-    margin: 0 144px;
-    margin-bottom: 50px;
-}
-
-//home page
-
-.home-content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-left: 144px;
-    margin-right: 144px;
-    width: auto;
-}

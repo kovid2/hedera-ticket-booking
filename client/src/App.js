@@ -1,6 +1,6 @@
 import React from 'react';
 import TicketForm from './components/TicketForm';
-import TicketHome from './pages/TicketHome';
+import TicketHome from './pages/TicketHome/TicketHome';
 import { GlobalAppContextProvider } from './contexts/GlobalAppContext';
 import ListAllEvents from './components/ListAllEvents/ListAllEvents';
 import ListAllUserTickets from './components/ListAllUserTickets';
