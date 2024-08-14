@@ -2,7 +2,7 @@ import { AccountId, Client, PrivateKey } from "@hashgraph/sdk";
 import { useContext, useState } from "react";
 import { GlobalAppContext } from "./contexts/GlobalAppContext";
 import { fetchLoyaltyTokenBalance, getNFTinformation, mainNftTranferWrapper, sendHbarToUser , sentHbarToTreasury, transferLoyaltyToken, transferTicketNFT} from './services/hederaService'
-import NavBar from "./components/Navbar";
+import NavBar from "./components/Navbar/Navbar";
 export let client;
 
 export default  function Home() {
