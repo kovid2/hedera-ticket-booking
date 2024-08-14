@@ -17,18 +17,35 @@
     margin-right: 180px;
 }
 
+.navbar-links {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 15%;
+    margin-left: 150px;
+
+    a {
+        color: var.$GS100;
+        text-decoration: none;
+        font-family: Helvetica;
+        font-size: 16px;
+        margin-left: 20px;
+    }
+}
+
 .navbar-button-container {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    width: 100%;
+    width: 20%;
+    margin-right: 0px;
+    margin-left: auto;
 }
 
 .navbar-button {
     display: flex;
     color: var.$GS100;
     border: none;
-    cursor: pointer;
     text-decoration: none;
     margin-left: auto; 
     margin-right: 0;
