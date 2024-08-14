@@ -9,9 +9,9 @@ function App() {
   return (
     <GlobalAppContextProvider>
     <div className="App">
+      <TicketHome/>
       <h1>Hedera Ticket Booking System</h1>
       <TicketForm />
-      <TicketHome/>
       <ListAllEvents />
       <ListAllUserTickets />
     </div>

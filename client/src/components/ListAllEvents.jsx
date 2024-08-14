@@ -7,6 +7,8 @@ import { AccountId, Client, PrivateKey } from "@hashgraph/sdk";
 import { client
 
  } from '../TicketHome';
+
+ import EventCard from './EventCard/EventCard';
 const myAccountEvm = process.env.REACT_APP_MY_ACCOUNT_EVM_ID;
 const myAccountId = AccountId.fromString(process.env.REACT_APP_MY_ACCOUNT_ID);
 
@@ -37,11 +39,8 @@ export default function ListAllEvents() {
             <div className="events-container">
                 {events.length > 0 ? (
                     events.map((event) => (
-                        <div key={event.ID} className="event-row">
-                            <span><strong>Title:</strong> {event.title}</span>
-                            <span><strong>Description:</strong> {event.description}</span>
-                            <span><strong>Price:</strong> {event.price} Hbar</span>
-                            <span><strong>Venue:</strong> {`${event.venue}, ${event.city}, ${event.country}`}</span>
+                        <div key={event.id} className="event-card">
+                            <EventCard event={event} />
                             <button onClick={() => buyTicket(event)}>Buy Ticket</button>
                         </div>
                     ))
