@@ -3,11 +3,13 @@
 .text-button {
     display: flex;
     justify-content: center;
+    margin: auto;
     align-items: center;
-    width: fit-content;
+    width: 90%;
     height: 51px;
     background-color: var.$green;
     color: var.$GS100;
+    margin-bottom: 30px;
     padding: 10px 20px;
     border-radius: 10px;
     border: none;

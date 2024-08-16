@@ -9,7 +9,7 @@ import '../../utilities/globals.scss';
 
 import cart from '../../assets/cartBlack.svg';
 import x from '../../assets/xCloseGreen.svg';
-import metamask from '../../assets/metaMaskLogo.png';
+import ethereum from '../../assets/ethereum.svg';
 
 import TextButton from '../TextButton/TextButton';
 
@@ -21,6 +21,8 @@ export default function Profile({ toggleCart }) {
             document.body.style.overflow = '';
         };
     }, []);
+
+    let total = 0.36693;
 
     return (
         <>
@@ -40,6 +42,24 @@ export default function Profile({ toggleCart }) {
 
                     </div>
                 </div>
+                <div className="cart-footer"> 
+
+                        <div className="cart-footer-text">
+                        
+                        <div className="total">
+                            <h1>TOTAL</h1>
+                        </div>
+
+                        <div className="amount">
+                            <img src={ethereum} alt="ethereum" />
+                            <h1>{total} </h1>
+                        </div>
+
+                        </div>
+                    
+
+                        <TextButton text="CHECKOUT" />
+                    </div>
             </div>  
 
             <div className="blur-bg"></div>
