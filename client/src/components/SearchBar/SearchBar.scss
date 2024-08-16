@@ -65,3 +65,23 @@
         cursor: pointer;
     }
 }
+
+@media (max-width: 768px) { 
+    .search-bar {
+        width: 90%;
+        padding: 0 12px; 
+    }
+
+    .search-bar-text {
+        margin-right: 8px; 
+    }
+
+    .search-bar-button {
+        width: 90px; 
+        height: 40px; 
+    }
+
+    button {
+        font-size: 13px; 
+    }
+}
