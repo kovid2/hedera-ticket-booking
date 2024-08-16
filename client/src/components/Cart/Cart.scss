@@ -1,1 +1,38 @@
 @use '/src/utilities/variables' as var;
+
+.cart {
+    display: flex;
+    right: 0;
+    position: absolute;
+    flex-direction: column;
+    width: 431px;
+    height: 100%;
+    background-color: var.$GS100;
+    z-index: 3;
+}
+
+.cart-container {
+    display: flex;
+    flex-direction: column;
+    margin: auto;
+    width: 390px;
+    height: 100%;
+
+}
+
+.cart-header {
+    margin-top: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.cart-content {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    margin-top: 20px;
+
+}
