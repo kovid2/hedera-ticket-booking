@@ -189,7 +189,7 @@ export const transferTicketNFT = async (fromAddress, toEVMAddress, event, client
 	const tokenTransferRx = await tokenTransferSubmit.getReceipt(client);
 	console.log(`\nNFT transfer from Treasury to Ashley ${tokenTransferRx.status} \n`);
 
-	//let res = await freezeToken(event.eventId, client, toAddress);
+	let res = await freezeToken(event.eventID, event.freezeKey, client, toEVMAddress);
 	//console.log(res);
 	return tokenTransferRx;
 }
@@ -322,16 +322,24 @@ export const getFreezeKey = async (tokenId, client) => {
 	return res;
 }
 
-const freezeToken = async (tokenId, client, accountId) => {
+const freezeToken = async (tokenId, freezeKey, client, accountId) => {
+
+	console.log('Freezing token');
+	console.log(`Token ID: ${tokenId}`);
+	console.log(`Freeze Key: ${freezeKey}`);
+	console.log(`Account ID: ${accountId}`);
+
+	const toAddress = AccountId.fromEvmAddress(0, 0, accountId); //accountId is EVM
 
 	//Freeze an account from transferring a token
 	const transaction = await new TokenFreezeTransaction()
-		.setAccountId(accountId)
+		//.setAccountId(AccountId.fromString("0.0.4672654"))
+		.setAccountId(toAddress)
 		.setTokenId(tokenId)
 		.freezeWith(client);
 
 	//Sign with the freeze key of the token 
-	const signTx = await transaction.sign(PrivateKey.fromStringDer(await getFreezeKey(tokenId, client)));
+	const signTx = await transaction.sign(PrivateKey.fromStringDer(freezeKey));
 
 	//Submit the transaction to a Hedera network    
 	const txResponse = await signTx.execute(client);
@@ -344,8 +352,6 @@ const freezeToken = async (tokenId, client, accountId) => {
 
 	console.log("The transaction consensus status " + transactionStatus.toString());
 	return transactionStatus;
-
-	//v2.0.7
 
 }
 

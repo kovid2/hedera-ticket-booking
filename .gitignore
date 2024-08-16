@@ -1,2 +1,3 @@
 ./hedera-ticket-backend/.env
 ./hedera-ticket-backend/uploads
+./.vscode
