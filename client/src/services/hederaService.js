@@ -272,6 +272,7 @@ export const transferLoyaltyToken = async (fromAddress, toEVMAddress, amount, cl
 		}
 		else {
 			console.log("Well fuck couldn't transfer loyalty token.");
+			//LMAO
 			console.warn(e);
 			return null;
 		}
