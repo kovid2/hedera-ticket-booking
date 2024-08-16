@@ -1,0 +1,19 @@
+@use '/src/utilities/variables' as var;
+
+.icon-button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: fit-content;
+    height: 51px;
+    background-color: var.$green;
+    color: var.$GS100;
+    padding: 10px 20px;
+    border-radius: 10px;
+    border: none;
+
+    img {
+        width: 24px;
+        height: 24px;
+    }
+}
