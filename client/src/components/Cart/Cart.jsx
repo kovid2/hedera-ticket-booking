@@ -22,7 +22,7 @@ export default function Profile({ toggleCart }) {
         };
     }, []);
 
-    let total = 0.36693;
+    let total = 0;
 
     return (
         <>
