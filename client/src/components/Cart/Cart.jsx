@@ -1,3 +1,4 @@
+// Cart.js
 import React, { useEffect, useContext } from 'react';
 import { AccountId } from "@hashgraph/sdk";
 import { CartContext } from '../../contexts/CartContext';
@@ -13,13 +14,14 @@ import x from '../../assets/xCloseGreen.svg';
 import ethereum from '../../assets/ethereum.svg';
 
 import TextButton from '../TextButton/TextButton';
+import { useSnackbar } from '../../contexts/SnackbarContext'; // Import the useSnackbar hook
 
 const myAccountId = AccountId.fromString(process.env.REACT_APP_MY_ACCOUNT_ID);
 
 export default function Cart({ toggleCart }) {
-
     const { metamaskAccountAddress } = useContext(GlobalAppContext);
     const { cart, removeFromCart, clearCart } = useContext(CartContext);
+    const { showSnackbar } = useSnackbar(); // Get the showSnackbar function
 
     const total = cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
 
@@ -31,17 +33,21 @@ export default function Cart({ toggleCart }) {
     }, []);
 
     const buyTicket = async (event) => {
-        alert(`Buying ticket for ${event.title}`);
+        showSnackbar(`Buying ticket for ${event.title}`, 'info'); // Use snackbar for buying ticket
         await mainNftTranferWrapper(myAccountId, metamaskAccountAddress, event, client);
-    }
+    };
 
     const checkout = async () => {
-        for (let item of cart) {
-            await buyTicket(item);
+        try {
+            for (let item of cart) {
+                await buyTicket(item);
+            }
+            clearCart();
+            showSnackbar("Thank you for buying tickets with ticketByte!", 'success'); // Use snackbar for checkout success
+        } catch (error) {
+            showSnackbar("There was an error with your purchase.", 'error'); // Use snackbar for errors
         }
-        clearCart(); 
-        alert("Thank you for buying tickets with ticketByte!");
-    }
+    };
 
     return (
         <>
