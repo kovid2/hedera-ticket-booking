@@ -10,7 +10,6 @@ import { CartContext } from '../../contexts/CartContext';
 import EventPlaceHolderImage from '../../assets/eventPlaceholderImage.png';
 import cart from '../../assets/shoppingCart.svg';
 
-const myAccountId = AccountId.fromString(process.env.REACT_APP_MY_ACCOUNT_ID);
 
 export default function EventCard({ event }) {
     const { metamaskAccountAddress } = useContext(GlobalAppContext);
@@ -27,11 +26,6 @@ export default function EventCard({ event }) {
             minute: 'numeric',
             hour12: true
         });
-    }
-
-    const buyTicket = async (event) => {
-        alert(`Buying ticket for ${event.title}`);
-        await mainNftTranferWrapper(myAccountId, metamaskAccountAddress, event, client);
     }
 
     return (
