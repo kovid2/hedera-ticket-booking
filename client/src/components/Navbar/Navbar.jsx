@@ -31,7 +31,7 @@ export default function NavBar() {
 
         <div className="navbar-links">
           <a href="/Events">Events</a>
-          <a href="/Tickets">My Tickets</a>
+          <a href="/MyTickets">My Tickets</a>
           <a href='/CreateTickets'>Create</a>
         </div>
 
