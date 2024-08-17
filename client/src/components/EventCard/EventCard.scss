@@ -18,6 +18,11 @@
     }
 }
 
+.event-card-container {
+    width: 100%;
+    display: flex;
+}
+
 .event-card-info {
     display: flex;
     flex-direction: column;
@@ -25,6 +30,7 @@
     height: 79px;
     padding: 10px;
     border-radius: 0 0 10px 10px;
+    width: 50%;
 
     h3 {
         color: var.$GS600;
@@ -44,4 +50,29 @@
         line-height: normal;
         margin-bottom: -15px;
     }
+}
+
+.event-card-buy {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: auto;
+    width: 50%;
+    height: 100%;
+
+    button {
+        width: 100px;
+        height: 30px;
+        margin: auto;
+        background-color: var.$GS600;
+        color: var.$GS100;
+        border: none;
+        border-radius: 5px;
+        font-family: Helvetica;
+        font-size: 10px;
+        font-style: normal;
+        font-weight: 700;
+        line-height: normal;
+    }
+
 }

@@ -1,8 +1,19 @@
 import './EventCard.scss';
 
+import React, { useState, useEffect, useContext } from 'react';
+import { client } from '../../pages/TicketHome/TicketHome';
+import { mainNftTranferWrapper } from '../../services/hederaService';
+import { GlobalAppContext } from "../../contexts/GlobalAppContext";
+import { AccountId } from "@hashgraph/sdk";
+
+
 import EventPlaceHolderImage from '../../assets/eventPlaceholderImage.png';
+import cart from '../../assets/shoppingCart.svg';
+const myAccountId = AccountId.fromString(process.env.REACT_APP_MY_ACCOUNT_ID);
 
 export default function EventCard({ event }) {
+    const { metamaskAccountAddress } = useContext(GlobalAppContext);
+    const [events, setEvents] = useState([]);
     
     let formattedDate = "";
 
@@ -17,18 +28,32 @@ export default function EventCard({ event }) {
             hour12: true
         });
     }
+
+    const buyTicket = async (event) => {
+        alert(`Buying ticket for ${event.title}`);
+        await mainNftTranferWrapper(myAccountId, metamaskAccountAddress, event, client);
+    }
+
     return (
         <div className="event-card">
+
             <div className="event-card-image">
                 <img src={event.image} alt src={EventPlaceHolderImage} />
             </div>
 
-            <div className="event-card-info">
+            <div className="event-card-container">
+                <div className='event-card-info'>
                 <p>{formattedDate}
                     <br />
                     {event.venue} | {event.city}, {event.country}
                 </p> 
                 <h3>{event.title}</h3>
+                </div>
+                <div className='event-card-buy'>
+                <button onClick={() => buyTicket(event)}>
+                    <img src={cart} alt="cart" />
+                </button>
+                </div>
             </div>
         </div>
     )

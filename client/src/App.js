@@ -12,7 +12,6 @@ function App() {
       <TicketHome/>
       <h1>Hedera Ticket Booking System</h1>
       <TicketForm />
-      <ListAllEvents />
       <ListAllUserTickets />
     </div>
     </GlobalAppContextProvider>
