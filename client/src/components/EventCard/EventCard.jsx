@@ -1,19 +1,18 @@
 import './EventCard.scss';
 
-import React, { useState, useContext } from 'react';
-import { client } from '../../pages/TicketHome/TicketHome';
-import { mainNftTranferWrapper } from '../../services/hederaService';
+import React, { useContext } from 'react';
 import { GlobalAppContext } from "../../contexts/GlobalAppContext";
-import { AccountId } from "@hashgraph/sdk";
 import { CartContext } from '../../contexts/CartContext';
+import { useSnackbar } from '../../contexts/SnackbarContext'; // Import the useSnackbar hook
 
 import EventPlaceHolderImage from '../../assets/eventPlaceholderImage.png';
 import cart from '../../assets/shoppingCart.svg';
 
-
 export default function EventCard({ event }) {
     const { metamaskAccountAddress } = useContext(GlobalAppContext);
     const { addToCart } = useContext(CartContext); 
+    const { showSnackbar } = useSnackbar(); // Get the showSnackbar function
+
     let formattedDate = "";
 
     if (event.dateAndTime) {
@@ -27,6 +26,11 @@ export default function EventCard({ event }) {
             hour12: true
         });
     }
+
+    const handleAddToCart = () => {
+        addToCart(event);
+        showSnackbar(`${event.title} added to cart!`, 'success'); 
+    };
 
     return (
         <div className="event-card">
@@ -43,11 +47,11 @@ export default function EventCard({ event }) {
                     <h3>{event.title}</h3>
                 </div>
                 <div className='event-card-buy'>
-                    <button onClick={() => addToCart(event)}>
+                    <button onClick={handleAddToCart}>
                         <img src={cart} alt="cart" />
                     </button>
                 </div>
             </div>
         </div>
-    )
+    );
 }
