@@ -21,10 +21,11 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    width: 15%;
+    width: 20%;
     margin-left: 150px;
 
     a {
+        align-items: center;
         color: var.$GS100;
         text-decoration: none;
         font-family: Helvetica;

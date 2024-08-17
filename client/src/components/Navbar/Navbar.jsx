@@ -26,11 +26,13 @@ export default function NavBar() {
     {isCartOpen && <Cart toggleCart={toggleCart} />}
     <div className="navbar">
       <div className="navbar-container">
-        <img src={ticketByte} alt="ticketByte" />
+        <a href="/Home"><img src={ticketByte} alt="ticketByte" /></a>
+        
 
         <div className="navbar-links">
           <a href="/Events">Events</a>
           <a href="/Tickets">My Tickets</a>
+          <a href='/CreateTickets'>Create</a>
         </div>
 
         <div className="navbar-button-container">

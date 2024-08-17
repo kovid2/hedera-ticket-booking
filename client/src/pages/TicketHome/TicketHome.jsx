@@ -59,8 +59,6 @@ export default  function Home() {
 
       <Footer/>
 
-
-
       <button
         onClick={() => {
           sendHbarToUser(client, myAccountId, metamaskAccountAddress, 7, myPrivateKey)
