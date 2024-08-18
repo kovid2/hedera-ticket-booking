@@ -33,11 +33,17 @@ export default function Cart({ toggleCart }) {
     }, []);
 
     const buyTicket = async (event) => {
-        showSnackbar(`Buying ticket for ${event.title}`, 'info'); // Use snackbar for buying ticket
+        showSnackbar(`Buying ticket for ${event.title}`, 'success'); // Use snackbar for buying ticket
         await mainNftTranferWrapper(myAccountId, metamaskAccountAddress, event, client);
     };
 
     const checkout = async () => {
+
+        if (!metamaskAccountAddress) {
+            showSnackbar("You need to connect your MetaMask wallet.", 'error'); // Show snackbar if MetaMask is not connected
+            return;
+        }
+
         try {
             for (let item of cart) {
                 await buyTicket(item);
