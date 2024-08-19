@@ -26,7 +26,7 @@ export default function NavBar() {
     {isCartOpen && <Cart toggleCart={toggleCart} />}
     <div className="navbar">
       <div className="navbar-container">
-        <a href="/Home"><img src={ticketByte} alt="ticketByte" /></a>
+        <a href="/Home"><img src={ticketByte} alt="ticketByte Rocks" /></a>
         
 
         <div className="navbar-links">
