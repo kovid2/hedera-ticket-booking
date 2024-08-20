@@ -16,7 +16,8 @@ const {
 	AccountBalanceQuery,
 	TokenCreateTransaction,
 	TokenAssociateTransaction,
-	TokenInfoQuery, } = require('@hashgraph/sdk');
+	TokenInfoQuery,
+	TransactionReceiptQuery } = require('@hashgraph/sdk');
 require('dotenv').config();
 const FormData = require('form-data');
 const db = require('./db');
@@ -401,7 +402,6 @@ app.get('/api/tickets/all', async (req, res) => {
 });
 
 
-
 app.post('/api/tickets/mint', async (req, res) => {
 	const { tokenId, accountId } = req.body;
 	try {
@@ -521,6 +521,131 @@ app.get('/api/search', async (req, res) => {
 		return res.status(500).json({ message: 'Error fetching search results' });
 	}
 });
+
+
+//API to transfer funds to user for their sales
+app.post('/api/fundstransfer', async (req, res) => {
+
+	try {
+		const { eventID, accountId } = req.body;
+		const event = await DB.collection('events').findOne({ eventID })
+		if (!event) {
+			return res.status(404).json({ error: 'Event not found' });
+		}
+		event.totalRevenue = (event.price * event.ticketsSold).toFixed(2);
+		event.serviceTax = (0.15 * event.totalRevenue).toFixed(2);
+		event.netRevenue = (event.totalRevenue - event.serviceTax).toFixed(2);
+		event.claimable = (event.netRevenue - event.paymentClaimed).toFixed(2);
+
+		if (event.claimable <= 0) {
+			return res.status(400).json({ error: 'No funds to transfer' });
+		}
+
+		//check if treasury has enough funds
+		const treasuryBalance = await new AccountBalanceQuery().setAccountId(process.env.MY_ACCOUNT_ID).execute(client);
+		if (treasuryBalance.hbars < event.claimable) {
+			return res.status(400).json({ error: 'Insufficient funds' });
+		}
+
+		let toAddress = AccountId.fromEvmAddress(0, 0, accountId);
+
+		const transferHbarTransaction = new TransferTransaction()
+			.addHbarTransfer(AccountId.fromString(process.env.MY_ACCOUNT_ID), -event.claimable)
+			.addHbarTransfer(toAddress, event.claimable)
+			.freezeWith(client);
+
+		const transferHbarTransactionSigned = await transferHbarTransaction.sign(operatorPrivateKey);
+		const transferHbarTransactionResponse = await transferHbarTransactionSigned.execute(client);
+
+		// Get the child receipt or child record to return the Hedera Account ID for the new account that was created
+		const transactionReceipt = await new TransactionReceiptQuery()
+			.setTransactionId(transferHbarTransactionResponse.transactionId)
+			.setIncludeChildren(true)
+			.execute(client);
+		console.log(`Transaction Status: ${transactionReceipt.status}`);
+	}
+	catch (error) {
+		console.error('Error transferring funds:', error);
+		return res.status(500).json({ error: 'Failed to transfer funds' });
+	}
+
+
+
+
+})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
