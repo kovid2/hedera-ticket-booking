@@ -11,6 +11,7 @@ import NavBar from './components/Navbar/Navbar';
 import CreateTickets from './pages/CreateTickets/CreateTickets';
 import Footer from './components/Footer/Footer';
 import SearchPage from './pages/SearchPage/SearchPage';
+import MyTickets from './pages/MyTickets/MyTickets';
 function App() {
   return (
     <SnackbarProvider>
@@ -22,7 +23,7 @@ function App() {
     <Routes>
       <Route path="/" element={<TicketHome />} />
       <Route path='/createTicket' element = {<CreateTickets />} />
-      <Route path='/profile' element = {<ListAllUserTickets />} />
+      <Route path='/profile' element = {<MyTickets/>} />
       <Route path='/search' element = {<SearchPage />} />
     </Routes>
     <Footer />

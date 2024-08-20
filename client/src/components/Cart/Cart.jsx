@@ -100,7 +100,9 @@ export default function Cart({ toggleCart }) {
                             <h1>TOTAL</h1>
                         </div>
                         <div className="amount">
-                            <img src={ethereum} alt="ethereum" />
+                            <img style={{
+                                width: '30px'
+                            }} src={ethereum} alt="ethereum" />
                             <h1>{total}</h1>
                         </div>
                     </div>
