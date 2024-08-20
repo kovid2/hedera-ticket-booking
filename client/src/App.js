@@ -8,6 +8,7 @@ import ListAllEvents from './components/ListAllEvents/ListAllEvents';
 import ListAllUserTickets from './components/ListAllUserTickets';
 import { Route, Routes  } from 'react-router-dom';
 import NavBar from './components/Navbar/Navbar';
+import CreateTickets from './pages/CreateTickets/CreateTickets';
 function App() {
   return (
     <GlobalAppContextProvider>
@@ -17,7 +18,7 @@ function App() {
     <NavBar />
     <Routes>
       <Route path="/" element={<TicketHome />} />
-      <Route path='/createTicket' element = {<TicketForm />} />
+      <Route path='/createTicket' element = {<CreateTickets />} />
       <Route path='/profile' element = {<ListAllUserTickets />} />
     </Routes>
       <h1>Hedera Ticket Booking System</h1>
