@@ -1,5 +1,8 @@
 import '../EventCard/EventCard.scss';
+import './EventCreatedCard.scss';
 
+
+import './EventCard.scss';
 
 import React, { useContext } from 'react';
 import { GlobalAppContext } from "../../contexts/GlobalAppContext";
@@ -11,7 +14,7 @@ import cartImg from '../../assets/shoppingCart.svg';
 import { client } from '../../pages/TicketHome/TicketHome';
 import { checkIfUserHasNft } from '../../services/hederaService';
 
-export default function MyProfileEventCard({ event }) {
+export default function EventCreatedCard({ event }) {
     const { metamaskAccountAddress } = useContext(GlobalAppContext);
     const { addToCart , cart} = useContext(CartContext); 
     const { showSnackbar } = useSnackbar(); // Get the showSnackbar function
@@ -30,8 +33,13 @@ export default function MyProfileEventCard({ event }) {
         });
     }
 
-
-
+    const handleTranferRevenue = () => {
+		if (!metamaskAccountAddress) {
+			showSnackbar('Please connect your wallet to transfer revenue.', 'error');
+			return;
+		}
+		showSnackbar(`Revenue for ${event.title} transferred successfully!`, 'success');
+	}
     return (
         <div className="event-card">
             <div className="event-card-image">
@@ -46,10 +54,20 @@ export default function MyProfileEventCard({ event }) {
                     </p>
                     <h4>{event.description}</h4>
                     <h3>{event.title}</h3>
-
                  
                 </div>
-               
+                <div className='event-card-buy'>
+				<p>Total Revenue: {event.totalRevenue}</p>
+				<p>Total Service Tax (@15%): {event.serviceTax}</p>
+				<p>Total Net Revenue: {event.netRevenue}</p>
+                    { (event.totalTickets > event.ticketsSold) ? <button onClick={handleTranferRevenue}>
+                        TRANSFER
+                    </button>
+                    : <button disabled>
+                       SOLD OUT
+                    </button>
+                    }
+                </div>
             </div>
         </div>
     );
