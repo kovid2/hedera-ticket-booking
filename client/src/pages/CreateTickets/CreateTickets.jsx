@@ -70,10 +70,11 @@ const CreateTickets = () => {
 
       <div className="form-group">
         <label>Artist:</label>
-        <text
+        <input
+          type="text"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          placeholder="Artist or Event Description"
+          placeholder="Artist Name"
           required
         />
       </div>
@@ -156,13 +157,16 @@ const CreateTickets = () => {
       </div>
 
       <div className="form-group">
-        <label>Ticket Image:</label>
+        <label>Ticket Image (.jpg or .jpeg):</label>
         <input
           type="file"
+          accept=".jpg,.jpeg,.png"
           onChange={(e) => setTicketImage(e.target.files[0])}
           required
         />
       </div>
+     
+    <input type='checkbox' required/> <span> I agree to the terms and conditions </span>
 
       <button type="submit" className="submit-button" disabled={isLoading}>
         {isLoading ? 'Creating...' : 'Create Tickets'}

@@ -73,3 +73,12 @@ export const fetchAllUserTickets = async (accountId) => {
 		return null;
 	}
 }
+
+export const searchSuggestions = async (term) => {
+	try {
+        const response = await axios.get(`${URL}/api/suggest`, { params: { term } });
+        return response.data;
+      } catch (error) {
+        console.error('Error fetching suggestions', error);
+      }
+}

@@ -12,14 +12,18 @@ import x from '../../assets/xCloseGreen.svg';
 import metamask from '../../assets/metaMaskLogo.png';
 
 import TextButton from '../TextButton/TextButton';
+import { useSnackbar } from '../../contexts/SnackbarContext'; // Import the useSnackbar hook
 
 export default function Profile({ toggleProfile }) {
     // use the GlobalAppContext to keep track of the metamask account connection
     const { metamaskAccountAddress, setMetamaskAccountAddress } = useContext(GlobalAppContext);
+    const { showSnackbar } = useSnackbar(); // Get the showSnackbar function
+
 
     const retrieveWalletAddress = async () => {
         console.log("retrieving wallet address");
         const addresses = await connectToMetamask();
+        
         console.log(addresses);
 
         if (addresses) {
@@ -28,6 +32,12 @@ export default function Profile({ toggleProfile }) {
             let res = await fetchUser(addresses[0]);
             console.log(res);
             console.log(addresses[0]);
+            showSnackbar(`Connected to wallet: ${addresses[0]}`, 'success');
+        }
+        else {
+          showSnackbar("Metamask is not installed! Go install the extension!", 'error');
+            console.error("Metamask is not installed! Go install the extension!");
+            return;
         }
     };
 
@@ -55,6 +65,11 @@ export default function Profile({ toggleProfile }) {
                     <div className="profile-content">
                         <img src={metamask} alt="metamask" />
                         <TextButton text={metamaskAccountAddress === "" ? "CONNECT METAMASK WALLET" : `CONNECTED TO: ${metamaskAccountAddress.substring(0, 8)}...`} onClick={retrieveWalletAddress} />
+                        <br />
+                        {metamaskAccountAddress !== "" && <TextButton text="DISCONNECT" onClick={() => { 
+                            setMetamaskAccountAddress("")
+                            showSnackbar("Disconnected from wallet", 'success');
+                        }} />}
                     </div>
                 </div>
             </div>  

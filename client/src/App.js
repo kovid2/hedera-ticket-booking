@@ -11,9 +11,10 @@ import NavBar from './components/Navbar/Navbar';
 import CreateTickets from './pages/CreateTickets/CreateTickets';
 function App() {
   return (
+    <SnackbarProvider>
     <GlobalAppContextProvider>
     <CartProvider>
-    <SnackbarProvider>
+   
     <div className="App">
     <NavBar />
     <Routes>
@@ -25,9 +26,10 @@ function App() {
       <TicketForm />
       <ListAllUserTickets />
     </div>
-    </SnackbarProvider>
+   
     </CartProvider>
     </GlobalAppContextProvider>
+    </SnackbarProvider>
   );
 }
 

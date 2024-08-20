@@ -147,7 +147,7 @@ app.get('/api/user/:walletId', async (req, res) => {
 				genres: [],
 				typesOfEvents: [],
 			});
-			await DB.collection("users").insertOne(newUser );
+			await DB.collection("users").insertOne(newUser);
 			const user = await DB.collection("users").findOne({ walletId });
 			res.status(200).json({ user });
 		}
@@ -178,10 +178,10 @@ app.post('/api/tickets', upload.fields([{ name: 'ticketImage' }]), async (req, r
 			description,
 			title } = req.body;
 
-	    if (!price || !numTickets || !walletId || !venue || !ticketTokenName || !city || !country || !dateAndTime || !description || !title) {
+		if (!price || !numTickets || !walletId || !venue || !ticketTokenName || !city || !country || !dateAndTime || !description || !title) {
 			return res.status(400).json({ error: 'Missing required fields' });
 		}
-	//	const reservationImage = req.files['reservationImage'][0];
+		//	const reservationImage = req.files['reservationImage'][0];
 		const ticketImage = req.files['ticketImage'][0];
 
 		// Read the uploaded images (optional, for demonstration purposes)
@@ -242,7 +242,7 @@ app.post('/api/tickets', upload.fields([{ name: 'ticketImage' }]), async (req, r
 		const maxTransactionFee = new Hbar(20);
 
 		const metadataUri = `ipfs://${metadataResult.IpfsHash}`;
-	
+
 
 		//TODO: Make event data come from the front end
 		const eventData = new EventSchema({
@@ -371,67 +371,76 @@ app.get('/api/tickets/all', async (req, res) => {
 
 
 
-app.post ('/api/tickets/mint', async (req, res) => {
+app.post('/api/tickets/mint', async (req, res) => {
 	const { tokenId, accountId } = req.body;
-	try{
+	try {
 		//fetch event info
 		const event = await DB.collection('events').findOne({
 			eventID: tokenId
 		});
 		const mintNFT = new TokenMintTransaction()
-				.setTokenId(tokenId)
-				.setMetadata([Buffer.from(event.metadataUri)])
-				.freezeWith(client);
-			console.log(event);
+			.setTokenId(tokenId)
+			.setMetadata([Buffer.from(event.metadataUri)])
+			.freezeWith(client);
+		console.log(event);
 
-			const mintNFTSign = await mintNFT.sign(PrivateKey.fromStringED25519(event.supplyKey));
-			const mintNFTSubmit = await mintNFTSign.execute(client);
+		const mintNFTSign = await mintNFT.sign(PrivateKey.fromStringED25519(event.supplyKey));
+		const mintNFTSubmit = await mintNFTSign.execute(client);
 
-			const mintNFTReceipt = await mintNFTSubmit.getReceipt(client);
+		const mintNFTReceipt = await mintNFTSubmit.getReceipt(client);
 
-			console.log(`Minted NFT with Token ID: ` + tokenId);
+		console.log(`Minted NFT with Token ID: ` + tokenId);
 
-			//Get total supply
-			let query = new TokenInfoQuery()
-				.setTokenId(tokenId);
-			
-			//Sign with the client operator private key, submit the query to the network and get the token supply
-			const res1 = (await query.execute(client)).totalSupply.toString();
-			
-			res.status(200).json({ message: 'NFT minted successfully', res1 });
-		}
-		catch(e){
-			console.warn(e);
-			res.status(500).json({ error: 'Failed to mint NFT' });
-		}
-	
+		//Get total supply
+		let query = new TokenInfoQuery()
+			.setTokenId(tokenId);
+
+		//Sign with the client operator private key, submit the query to the network and get the token supply
+		const res1 = (await query.execute(client)).totalSupply.toString();
+
+		res.status(200).json({ message: 'NFT minted successfully', res1 });
+	}
+	catch (e) {
+		console.warn(e);
+		res.status(500).json({ error: 'Failed to mint NFT' });
+	}
+
 });
 
-app.get('/suggest', async (req, res) => {
-  const { term } = req.query;
+app.get('/api/suggest', async (req, res) => {
+	const { term } = req.query;
 
-  if (!term) {
-    return res.status(400).json({ message: 'Search term is required' });
-  }
+	if (!term) {
+		return res.status(400).json({ message: 'Search term is required' });
+	}
+	console.log("term", term);
 
-  const regex = new RegExp(term, 'i'); // Case-insensitive search
-  try {
-    const suggestions = await DB.collection("events").find({
-      $or: [
-        { venue: regex },
-        { city: regex },
-        { country: regex },
-        { description: regex },
-        { title: regex }
-      ]
-    })
-    .select('venue city country description title') // Select only the fields you need for suggestions
-    .limit(10); // Limit the number of suggestions
-
-    res.json(suggestions);
-  } catch (error) {
-    res.status(500).json({ message: 'Error fetching suggestions', error });
-  }
+	const regex = new RegExp(term, 'i'); // Case-insensitive search
+	try {
+		const suggestions = await DB.collection("events").find({
+			$or: [
+				{ venue: regex },
+				{ city: regex },
+				{ country: regex },
+				{ description: regex },
+				{ title: regex }
+			]
+		})
+			.project({
+				venue: 1,
+				city: 1,
+				country: 1,
+				description: 1,
+				title: 1
+			}) // Project only the fields you need
+			.limit(10) // Limit the number of suggestions
+			.toArray(); // Convert the cursor to an array
+		console.log("suggestions", suggestions);
+		return res.status(200).json(suggestions);
+		// Use suggestions as needed
+	} catch (error) {
+		console.error('Error fetching suggestions', error);
+	}
 });
 
 

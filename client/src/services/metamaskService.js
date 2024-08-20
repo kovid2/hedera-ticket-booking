@@ -40,8 +40,9 @@ export const connectToMetamask = async () => {
   // keep track of accounts returned
   let accounts = [];
   if (!ethereum) {
-    Snackbar('Metamask is not installed! Go install the extension!');
-    throw new Error("Metamask is not installed! Go install the extension!");
+    return false;
+   
+    //throw new Error("Metamask is not installed! Go install the extension!");
   }
   
   await switchToHederaNetwork(ethereum);
@@ -57,8 +58,9 @@ export const connectToMetamask = async () => {
 export const disconnectMetamask = async () => {
   const { ethereum } = window;
   if (!ethereum) {
+    return false;
     Snackbar('Metamask is not installed! Go install the extension!');
-    throw new Error("Metamask is not installed! Go install the extension!");
+   // throw new Error("Metamask is not installed! Go install the extension!");
   }
 
   await ethereum.request({
