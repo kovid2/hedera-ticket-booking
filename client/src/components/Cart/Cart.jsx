@@ -66,9 +66,8 @@ export default function Cart({ toggleCart }) {
                             <img src={x} alt="x" />
                         </button>
                     </div>
-
+                    <p>We don't batch all the trasactions together. So when you are buying the tickets you will have to approve each transaction seperately. You maybe asked for additional approvals if ticket token is not associated with your account.</p>
                     <div className="divider-tab"></div>
-
                     <div className="cart-content">
                         {cart.length === 0 ? (
                             <p>Your cart is empty.</p>

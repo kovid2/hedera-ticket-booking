@@ -32,7 +32,7 @@ export default function ListAllEvents() {
         <div className="events-container">
             {events.length > 0 ? (
                 events.map((event) => (
-                    <div key={event.id} className="event-card">
+                    <div key={event.eventID} className="event-card">
                         <EventCard event={event} />
                     </div>
                 ))

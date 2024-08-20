@@ -7,13 +7,10 @@ export const CartProvider = ({ children }) => {
 
     const addToCart = (item) => {
         setCart((prevCart) => {
-            const existingItem = prevCart.find(cartItem => cartItem.id === item.id);
+            const existingItem = prevCart.find(cartItem => cartItem.eventID === item.eventID);
             if (existingItem) {
-                return prevCart.map(cartItem => 
-                    cartItem.id === item.id 
-                    ? { ...cartItem, quantity: cartItem.quantity + 1 }
-                    : cartItem
-                );
+                console.log('Item already in cart');
+                return prevCart
             } else {
                 return [...prevCart, { ...item, quantity: 1 }];
             }
