@@ -1,8 +1,5 @@
-import '../EventCard/EventCard.scss';
+
 import './EventCreatedCard.scss';
-
-
-import './EventCard.scss';
 
 import React, { useContext } from 'react';
 import { GlobalAppContext } from "../../contexts/GlobalAppContext";
@@ -41,25 +38,36 @@ export default function EventCreatedCard({ event }) {
 		showSnackbar(`Revenue for ${event.title} transferred successfully!`, 'success');
 	}
     return (
-        <div className="event-card">
-            <div className="event-card-image">
+        <div className="event-card-1">
+            <div className="event-card-image-1">
                 <img  alt={"cart"}  src={`${process.env.REACT_APP_PINATA_GATEWAY}/ipfs/${event.image.substring(7)}`} />
             </div>
 
-            <div className="event-card-container">
-                <div className='event-card-info'>
+            <div className="event-card-container-1">
+                <div className='event-card-info-1'>
                     <p>{formattedDate}
                         <br />
                         {event.venue} | {event.city}, {event.country}
+						<br/>
+						<br/>
+						<span>Total Revenue: {event.totalRevenue} Hbar</span>
+						<br/>
+						<span>Total Service Tax (@15%): {event.serviceTax} Hbar</span>
+						<br/>
+						<span>Total Net Revenue: {event.netRevenue} Hbar</span>
+						<br />
+						<br />
+						<span>Revenue Already Transferred: {event.paymentClaimed} Hbar</span>
+						<br />
+						<span>Claimable Revenue: {event.claimable} Hbar</span>
                     </p>
                     <h4>{event.description}</h4>
                     <h3>{event.title}</h3>
+					
                  
                 </div>
-                <div className='event-card-buy'>
-				<p>Total Revenue: {event.totalRevenue}</p>
-				<p>Total Service Tax (@15%): {event.serviceTax}</p>
-				<p>Total Net Revenue: {event.netRevenue}</p>
+                <div className='event-card-buy-1'>
+					<p>Tickets sold: {event.ticketsSold} of {event.totalTickets} </p>
                     { (event.totalTickets > event.ticketsSold) ? <button onClick={handleTranferRevenue}>
                         TRANSFER
                     </button>

@@ -7,6 +7,7 @@ import { fetchAllUserTickets, fetchUserCreatedEvents } from "../../network/api";
 import { fetchLoyaltyTokenBalance } from "../../services/hederaService";
 import { client } from "../TicketHome/TicketHome";
 import MyProfileEventCard from "../../components/MyProfileEventCard/MyProfileEventCard";
+import EventCreatedCard from "../../components/MyProfileEventCard/EventCreatedCard";
 
 
 export default function MyTickets() {
@@ -74,17 +75,19 @@ export default function MyTickets() {
 					<div className="divider-screen"></div>
 					<h1 className="my-profile-heading">USER CREATED TICKETS</h1>
 					<div className="line-accent"></div>
-					<div className="events-container">
+					<div className="events-container-1">
 					{createdTickets.length > 0 ? (
 						createdTickets.map((event) => (
 							<div key={event.eventID} className="event-card">
-								<MyProfileEventCard event={event} />
+								<EventCreatedCard event={event} />
 							</div>
 						))
 					) : (
 						<p>No events found.</p>
 					)}
 					</div>
+					<div className="divider-screen"></div>
+					<div className="divider-screen"></div>
 				</div>
 			</div>
 		</>

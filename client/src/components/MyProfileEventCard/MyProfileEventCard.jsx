@@ -43,6 +43,9 @@ export default function MyProfileEventCard({ event }) {
                     <p>{formattedDate}
                         <br />
                         {event.venue} | {event.city}, {event.country}
+						<br/>
+						<br/>
+						<strong>{event.totalTickets-event.ticketsSold} tickets left!</strong>
                     </p>
                     <h4>{event.description}</h4>
                     <h3>{event.title}</h3>

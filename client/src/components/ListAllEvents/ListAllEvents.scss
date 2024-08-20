@@ -8,3 +8,14 @@
     justify-content: center;
     
 }
+
+.events-container-1 {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(500px, 1fr));
+    gap: 26px;
+    margin: 0 144px;
+    margin-bottom: 50px;
+    width: 100%;
+    justify-content: center;
+    
+}
