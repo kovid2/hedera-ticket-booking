@@ -75,6 +75,17 @@ export const fetchAllUserTickets = async (accountId) => {
 	}
 }
 
+export const fetchUserCreatedEvents = async (accountId) => {
+	try {
+		const res = await axios.get(`${URL}/api/user/created/${accountId}`);
+		console.log(res.data);
+		return res.data;
+	} catch (e) {
+		console.warn(e);
+		return null;
+	}
+}
+
 export const searchSuggestions = async (term) => {
 	try {
         const response = await axios.get(`${URL}/api/suggest`, { params: { term } });
