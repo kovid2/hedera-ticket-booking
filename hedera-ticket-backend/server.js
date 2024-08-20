@@ -357,6 +357,34 @@ app.get('/api/user/ticket/:walletId', async (req, res) => {
 	}
 });
 
+//API endpoint to get user created events
+
+app.get('/api/user/created/:walletId', async (req, res) => {
+	try {
+		const walletId = req.params.walletId;
+		const user = await DB.collection('users').findOne({ walletId });
+		if (!user) {
+			return res.status(404).json({ error: 'User not found' });
+		}
+		//return detail about users ticketts and events.
+
+		let events = [];
+
+		for (let i = 0; i < user.eventsCreated.length; i++) {
+			const event = await DB.collection('events').findOne({ eventID: user.eventsCreated[i] });
+			event.totalRevenue = event.price * event.ticketsSold;
+			event.serviceTax = 0.15 * event.totalRevenue;
+			event.netRevenue = event.totalRevenue - event.serviceTax;
+			events.push(event);
+		}
+		return res.status(200).json({ user, events });
+	}
+	catch (error) {
+		console.log(error);
+		return res.status(500).json({ error: 'Failed to get user tickets' });
+	}
+});
+
 
 //API endpoint to get all events from DB
 app.get('/api/tickets/all', async (req, res) => {
