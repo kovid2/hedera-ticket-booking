@@ -83,3 +83,13 @@ export const searchSuggestions = async (term) => {
         console.error('Error fetching suggestions', error);
       }
 }
+
+export const searchEvents = async (term) => {
+	try {
+		const res = await axios.get(`${URL}/api/search`, { params: { term } });
+		return res.data;
+	} catch (e) {
+		console.warn(e);
+		return null;
+	}
+}

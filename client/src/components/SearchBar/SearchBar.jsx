@@ -1,11 +1,13 @@
 import { searchSuggestions } from '../../network/api';
 import { useState } from 'react';
 import './SearchBar.scss';
+import { useNavigate } from 'react-router-dom';
 
 export default function SearchBar() {
     const [searchTerm, setSearchTerm] = useState('');
     const [suggestions, setSuggestions] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
+    const navigate = useNavigate();
     let debounceTimeout;
 
     const handleSearchChange = async (e) => {
@@ -34,7 +36,11 @@ export default function SearchBar() {
     const handleSuggestionClick = (suggestion) => {
         setSearchTerm(suggestion); // Update search term with the selected suggestion
         setSuggestions([]); // Clear suggestions after selection
-        // Trigger search or further actions here if needed
+        navigate(`/search?search=${encodeURIComponent(suggestion)}`); // Navigate to search results
+    };
+
+    const handleSearchButtonClick = () => {
+        navigate(`/search?search=${encodeURIComponent(searchTerm)}`); // Navigate to search results with the current search term
     };
 
     const highlightText = (text, term) => {
@@ -44,6 +50,9 @@ export default function SearchBar() {
         if (!text) {
             return "";
         }
+        //strip whitespace
+        term = term.trim();
+        text = text.trim();
 
         const parts = text.split(new RegExp(`(${term})`, 'gi'));
         return parts.map((part, index) => (
@@ -74,7 +83,7 @@ export default function SearchBar() {
 
                 </div>
                 <div className="search-bar-button">
-                    <button onClick={() => handleSuggestionClick(searchTerm)}>Search</button>
+                    <button onClick={() => handleSearchButtonClick}>Search</button>
                 </div>
             </div>
             {isLoading && <div className="no-suggestions">Loading...</div>}

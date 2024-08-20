@@ -9,6 +9,8 @@ import ListAllUserTickets from './components/ListAllUserTickets';
 import { Route, Routes  } from 'react-router-dom';
 import NavBar from './components/Navbar/Navbar';
 import CreateTickets from './pages/CreateTickets/CreateTickets';
+import Footer from './components/Footer/Footer';
+import SearchPage from './pages/SearchPage/SearchPage';
 function App() {
   return (
     <SnackbarProvider>
@@ -21,12 +23,14 @@ function App() {
       <Route path="/" element={<TicketHome />} />
       <Route path='/createTicket' element = {<CreateTickets />} />
       <Route path='/profile' element = {<ListAllUserTickets />} />
+      <Route path='/search' element = {<SearchPage />} />
     </Routes>
+    <Footer />
       <h1>Hedera Ticket Booking System</h1>
       <TicketForm />
       <ListAllUserTickets />
     </div>
-   
+ 
     </CartProvider>
     </GlobalAppContextProvider>
     </SnackbarProvider>
