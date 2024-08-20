@@ -61,6 +61,10 @@ const EventSchema = new mongoose.Schema({
 		type: Number,
 		required: true,
 	},
+	paymentClaimed: {
+		type: Number,
+		default: 0,
+	},
 	
 });
 

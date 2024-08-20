@@ -347,6 +347,7 @@ app.get('/api/user/ticket/:walletId', async (req, res) => {
 
 		for (let i = 0; i < user.tickets.length; i++) {
 			const event = await DB.collection('events').findOne({ eventID: user.tickets[i].eventId });
+			event.serialNo = user.tickets[i].SerialNo;
 			events.push(event);
 		}
 		return res.status(200).json({ user, events });
@@ -372,12 +373,13 @@ app.get('/api/user/created/:walletId', async (req, res) => {
 
 		for (let i = 0; i < user.eventsCreated.length; i++) {
 			const event = await DB.collection('events').findOne({ eventID: user.eventsCreated[i] });
-			event.totalRevenue = event.price * event.ticketsSold;
-			event.serviceTax = 0.15 * event.totalRevenue;
-			event.netRevenue = event.totalRevenue - event.serviceTax;
+			event.totalRevenue = (event.price * event.ticketsSold).toFixed(2);
+			event.serviceTax = (0.15 * event.totalRevenue).toFixed(2);
+			event.netRevenue = (event.totalRevenue - event.serviceTax).toFixed(2);
+			event.claimable = (event.netRevenue - event.paymentClaimed).toFixed(2);
 			events.push(event);
 		}
-		return res.status(200).json({ user, events });
+		return res.status(200).json({ events });
 	}
 	catch (error) {
 		console.log(error);
@@ -385,6 +387,7 @@ app.get('/api/user/created/:walletId', async (req, res) => {
 	}
 });
 
+//
 
 //API endpoint to get all events from DB
 app.get('/api/tickets/all', async (req, res) => {
