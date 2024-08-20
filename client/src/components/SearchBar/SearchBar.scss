@@ -1,87 +1,137 @@
 @use '/src/utilities/variables' as var;
 
-.search-bar {
-    display: flex;
+.search-container {
+    position: relative; // For absolute positioning of suggestions
     width: 800px;
-    height: 55px;
-    flex-shrink: 0;
-    border-radius: 10px;
-    border: 1px solid var.$GS300;
-    background: var.$GS200;
-    align-items: center;
     margin: 21px auto;
 }
 
-.search-bar-text {
+.search-bar {
+    display: flex;
+    align-items: center;
+    border-radius: 10px;
+    border: 1px solid var.$GS300;
+    background: var.$GS200;
+    height: 55px;
+    position: relative; // For positioning suggestions correctly
+}
 
+.search-bar-text {
+    flex: 1;
     margin-left: 28px;
-    width: 80%;
     margin-right: 20px;
-    
+
     input {
+        width: 100%;
+        height: 100%;
+        padding: 0 10px;
+        border: none;
+        border-radius: 10px;
+        background: none;
         color: var.$GS400;
         font-family: Helvetica;
         font-size: 15px;
-        font-style: normal;
         font-weight: 400;
         line-height: 115.87%;
-        width: 100%;
-        border: none;
-        background: none;
-    }
 
-    input::placeholder {
-        color: var.$GS350;
-    }
+        &::placeholder {
+            color: var.$GS350;
+        }
 
-    input:focus {
-        outline: none;
+        &:focus {
+            outline: none;
+        }
     }
-
 }
 
 .search-bar-button {
     display: flex;
-    justify-content: center;
     align-items: center;
-    width: 15%;
-    height: 100%;
-    border-radius: 10px;
-    background: var.$green;
+    justify-content: center;
     width: 102px;
     height: 44px;
     margin-right: 6px;
+    background: var.$green;
+    border-radius: 10px;
     cursor: pointer;
 
     button {
+        border: none;
+        background: none;
         color: var.$GS100;
         font-family: Helvetica;
         font-size: 14px;
-        font-style: normal;
         font-weight: 700;
-        line-height: normal;
-        border: none;
-        background: none;
         cursor: pointer;
     }
 }
 
-@media (max-width: 768px) { 
-    .search-bar {
+.suggestions-list {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    max-height: 200px;
+    overflow-y: auto;
+    background: var.$GS200;
+    border: 1px solid var.$GS300;
+    border-radius: 0 0 10px 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.suggestions-list li {
+    padding: 8px 16px;
+    cursor: pointer;
+    font-family: Helvetica;
+    font-size: 14px;
+    color: var.$GS400;
+
+    &:hover {
+        background: var.$GS300;
+    }
+}
+
+.no-suggestions {
+    
+    padding: 8px 16px;
+    font-family: Helvetica;
+    font-size: 14px;
+    color: var.$GS400;
+    text-align: center;
+    background: var.$GS200;
+    border: 1px solid var.$GS300;
+    border-radius: 0 0 10px 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.loading {
+    margin-top: 8px;
+    font-family: Helvetica;
+    font-size: 14px;
+    color: var.$GS400;
+    text-align: center;
+}
+
+@media (max-width: 768px) {
+    .search-container {
         width: 90%;
-        padding: 0 12px; 
+        padding: 0 12px;
     }
 
-    .search-bar-text {
-        margin-right: 8px; 
+    .search-bar {
+        height: 40px;
     }
 
     .search-bar-button {
-        width: 90px; 
-        height: 40px; 
+        width: 90px;
+        height: 40px;
     }
 
-    button {
-        font-size: 13px; 
+    .search-bar-button button {
+        font-size: 13px;
     }
 }

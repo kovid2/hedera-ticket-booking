@@ -14,6 +14,7 @@ export const fetchUser = async (accountId) => {
 export const createTickets = async (formData) => {
 	try {
 		const res = await axios.post(`${URL}/api/tickets`, formData);
+		console.log(res.data);
 		return res.data;
 	} catch (e) {
 		console.warn(e);
