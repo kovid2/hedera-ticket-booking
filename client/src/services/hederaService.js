@@ -330,7 +330,7 @@ const freezeToken = async (tokenId, freezeKey, client, accountId) => {
 	console.log(`Freeze Key: ${freezeKey}`);
 	console.log(`Account ID: ${accountId}`);
 
-	const toAddress = AccountId.fromEvmAddress(0, 0, accountId); //accountId is EVM
+	const toAddress = AccountId.fromString(queryAccountByEvmAddress(accountId).accountId);
 
 	//Freeze an account from transferring a token
 	const transaction = await new TokenFreezeTransaction()
@@ -368,4 +368,29 @@ export const fetchLoyaltyTokenBalance = async (accountEvmId, client) => {
 		console.warn(e);
 		return null;
 	}
+}
+
+//helper function to convert account id to solidity address
+async function queryAccountByEvmAddress(evmAddress) {
+  let accountId;
+  let accountBalance;
+  let accountEvmAddress;
+  const accountFetchApiUrl = `https://testnet.mirrornode.hedera.com/api/v1/accounts/${evmAddress}?limit=1&order=asc&transactiontype=cryptotransfer&transactions=false`;
+  console.log('Fetching: ', accountFetchApiUrl);
+  try {
+    const accountFetch = await fetch(accountFetchApiUrl);
+    const accountObj = await accountFetch.json();
+    const account = accountObj;
+    accountId = account?.account;
+    accountBalance = account?.balance?.balance;
+    accountEvmAddress = account?.evm_address;
+  } catch (ex) {
+    console.error(ex);
+	return null;
+  }
+  return {
+    accountEvmAddress,
+    accountId,
+    accountBalance,
+  };
 }
