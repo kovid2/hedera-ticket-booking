@@ -413,11 +413,11 @@ app.get('/api/suggest', async (req, res) => {
 	if (!term) {
 		return res.status(400).json({ message: 'Search term is required' });
 	}
-	console.log("term", term);
 
-	const regex = new RegExp(term, 'i'); // Case-insensitive search
+	const regex = new RegExp(`${term}`, 'i'); // Match the beginning of the string, case-insensitive
+
 	try {
-		const suggestions = await DB.collection("events").find({
+		const events = await DB.collection("events").find({
 			$or: [
 				{ venue: regex },
 				{ city: regex },
@@ -432,15 +432,29 @@ app.get('/api/suggest', async (req, res) => {
 				country: 1,
 				description: 1,
 				title: 1
-			}) // Project only the fields you need
+			}) // Project all fields
 			.limit(10) // Limit the number of suggestions
 			.toArray(); // Convert the cursor to an array
-		console.log("suggestions", suggestions);
-		return res.status(200).json(suggestions);
-		// Use suggestions as needed
+
+		// Filter out fields that do not match the search term
+		const filteredSuggestions = events.map(event => {
+			const result = {};
+
+			if (regex.test(event.venue)) result.venue = event.venue;
+			if (regex.test(event.city)) result.city = event.city;
+			if (regex.test(event.country)) result.country = event.country;
+			if (regex.test(event.description)) result.description = event.description;
+			if (regex.test(event.title)) result.title = event.title;
+
+			return result;
+		});
+
+		return res.status(200).json(filteredSuggestions);
 	} catch (error) {
 		console.error('Error fetching suggestions', error);
+		return res.status(500).json({ message: 'Error fetching suggestions' });
 	}
+
 });
 
 
