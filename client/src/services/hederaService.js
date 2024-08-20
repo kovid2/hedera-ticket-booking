@@ -412,3 +412,27 @@ const queryAccountByEvmAddress = async (evmAddress) => {
     accountBalance,
   };
 }
+
+
+export const checkIfUserHasNft= async (accountEvmId, tokenId,client) => {
+	try {
+		
+		// Await the result of queryAccountByEvmAddress
+		let { accountId: accoun } = await queryAccountByEvmAddress(accountEvmId);
+		if (!accoun) {
+			throw new Error("Account ID could not be retrieved.");
+		}
+		
+		let accountId = AccountId.fromString(accoun);
+		let balanceCheckTx = await new AccountBalanceQuery().setAccountId(accountId).execute(client);
+		if (!balanceCheckTx.tokens._map.has(tokenId.toString())) {
+			return 0;
+		}
+		console.log(`- balance: ${balanceCheckTx.tokens._map.get(tokenId.toString())} units of token ID ${tokenId}`);
+		return balanceCheckTx.tokens._map.get(tokenId.toString()).toString();
+	}
+	catch (e) {
+		console.warn(e);
+		return null;
+	}
+}

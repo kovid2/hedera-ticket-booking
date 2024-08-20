@@ -7,6 +7,8 @@ import { useSnackbar } from '../../contexts/SnackbarContext'; // Import the useS
 
 import EventPlaceHolderImage from '../../assets/eventPlaceholderImage.png';
 import cartImg from '../../assets/shoppingCart.svg';
+import { client } from '../../pages/TicketHome/TicketHome';
+import { checkIfUserHasNft } from '../../services/hederaService';
 
 export default function EventCard({ event }) {
     const { metamaskAccountAddress } = useContext(GlobalAppContext);
@@ -32,6 +34,13 @@ export default function EventCard({ event }) {
             showSnackbar('Please connect your wallet to add events to cart.', 'error');
             return;
         }
+        let userBal = checkIfUserHasNft(metamaskAccountAddress, event.eventID, client);
+        if( userBal){
+            showSnackbar(`You already have ${event.title} in your wallet! Cannot buy more than one!`, 'error');
+            return;
+        }
+
+
         else{
             //if event id is in cart say you already have this event in cart
             //if not add to cart

@@ -22,6 +22,7 @@ export default function Cart({ toggleCart }) {
     const { metamaskAccountAddress } = useContext(GlobalAppContext);
     const { cart, removeFromCart, clearCart } = useContext(CartContext);
     const { showSnackbar } = useSnackbar(); // Get the showSnackbar function
+    const [disableButton, setDisableButton] = React.useState(false);
 
     const total = cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
 
@@ -33,8 +34,18 @@ export default function Cart({ toggleCart }) {
     }, []);
 
     const buyTicket = async (event) => {
-        showSnackbar(`Buying ticket for ${event.title}`, 'success'); // Use snackbar for buying ticket
-        await mainNftTranferWrapper(myAccountId, metamaskAccountAddress, event, client);
+        try{
+            setDisableButton(true);
+            showSnackbar(`Buying ticket for ${event.title}`, 'success'); // Use snackbar for buying ticket
+            await mainNftTranferWrapper(myAccountId, metamaskAccountAddress, event, client);
+            showSnackbar(`Ticket for ${event.title} bought successfully!`, 'success'); // Use snackbar for buying ticket success
+        }
+        catch (error) {
+            showSnackbar(`There was an error buying ticket for ${event.title}`, 'error'); // Use snackbar for buying ticket error
+        }  finally
+        {
+            setDisableButton(false);
+        }
     };
 
     const checkout = async () => {
@@ -77,7 +88,7 @@ export default function Cart({ toggleCart }) {
                                     <h4>{item.title}</h4>
                                     <p>Price: ${item.price}</p>
                                     <p>Quantity: {item.quantity}</p>
-                                    <button onClick={() => removeFromCart(item.id)}>Remove</button>
+                                    <button disabled={disableButton} onClick={() => removeFromCart(item.id)}>Remove</button>
                                 </div>
                             ))
                         )}

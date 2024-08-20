@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState ,useEffect} from 'react';
 import { useContext } from 'react';
 import { GlobalAppContext } from '../../contexts/GlobalAppContext';
 import { createTickets } from '../../network/api';
 import './CreateTickets.scss'; // Import the CSS file for styling
-import Snackbar from '../../components/Snackbar/Snackbar';
+import { useSnackbar } from '../../contexts/SnackbarContext';
+import { useNavigate } from 'react-router-dom';
+
 
 const CreateTickets = () => {
   const [price, setPrice] = useState('');
@@ -18,12 +20,20 @@ const CreateTickets = () => {
   const [ticketImage, setTicketImage] = useState(null);
   const { metamaskAccountAddress } = useContext(GlobalAppContext);
   const [isLoading, setIsLoading] = useState(false);
-
+  const {showSnackbar} = useSnackbar();
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (!metamaskAccountAddress) {
+     showSnackbar('Please connect your wallet to create tickets.' , 'error');
+     navigate('/');
+    }
+  }, []);
   const handleSubmit = async (e) => {
     e.preventDefault(); // Prevent the default form submission
 
     if (!metamaskAccountAddress) {
-      Snackbar('Please connect your wallet to create tickets.');
+      showSnackbar('Please connect your wallet to create tickets.' , 'error');
+      navigate('/');
       return;
     }
 
@@ -44,9 +54,11 @@ const CreateTickets = () => {
 
     try {
       const res = await createTickets(formData);
-      Snackbar('Tickets created successfully!');
+      showSnackbar('Tickets created successfully!', 'success');
+      navigate('/');
+      
     } catch (error) {
-      Snackbar('Error submitting form! Try again!', error);
+      showSnackbar('Error submitting form! Try again!', 'error');
     } finally {
       setIsLoading(false);
     }
