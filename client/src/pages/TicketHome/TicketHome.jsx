@@ -42,6 +42,7 @@ export default  function Home() {
   return (
     <>
       <SearchBar/>
+      //TODO:MAKE IT DYNAMIC
       <Banner image={Clancy} eventName='Clancy' eventOrganizer='Twenty One Pilots'/>
 
       <div className="divider-screen"></div>
