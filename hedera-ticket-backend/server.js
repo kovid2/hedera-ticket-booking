@@ -408,11 +408,14 @@ app.post('/api/tickets/mint', async (req, res) => {
 });
 
 app.get('/api/suggest', async (req, res) => {
-	const { term } = req.query;
+	let { term } = req.query;
 
 	if (!term) {
 		return res.status(400).json({ message: 'Search term is required' });
 	}
+
+	//strip whitespace and special characters
+	term = term.replace(/[^a-zA-Z0-9]/g, '');
 
 	const regex = new RegExp(`${term}`, 'i'); // Match the beginning of the string, case-insensitive
 
@@ -457,6 +460,36 @@ app.get('/api/suggest', async (req, res) => {
 
 });
 
+
+app.get('/api/search', async (req, res) => {
+	let { term } = req.query;
+
+	if (!term) {
+		return res.status(400).json({ message: 'Search term is required' });
+	}
+
+	//strip whitespace and special characters
+	term = term.replace(/[^a-zA-Z0-9]/g, '');
+
+	const regex = new RegExp(`${term}`, 'i'); // Match the beginning of the string, case-insensitive
+
+	try {
+		const events = await DB.collection("events").find({
+			$or: [
+				{ venue: regex },
+				{ city: regex },
+				{ country: regex },
+				{ description: regex },
+				{ title: regex }
+			]
+		}).toArray(); // Convert the cursor to an array
+
+		return res.status(200).json(events);
+	} catch (error) {
+		console.error('Error fetching search results', error);
+		return res.status(500).json({ message: 'Error fetching search results' });
+	}
+});
 
 
 
