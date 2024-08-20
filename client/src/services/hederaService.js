@@ -330,7 +330,7 @@ const freezeToken = async (tokenId, freezeKey, client, accountId) => {
 	console.log(`Freeze Key: ${freezeKey}`);
 	console.log(`Account ID: ${accountId}`);
 
-	const toAddress = AccountId.fromString(queryAccountByEvmAddress(accountId).accountId);
+	const toAddress = AccountId.fromString(await queryAccountByEvmAddress(accountId).accountId);
 
 	//Freeze an account from transferring a token
 	const transaction = await new TokenFreezeTransaction()
@@ -355,13 +355,22 @@ const freezeToken = async (tokenId, freezeKey, client, accountId) => {
 	return transactionStatus;
 
 }
-
 export const fetchLoyaltyTokenBalance = async (accountEvmId, client) => {
 	try {
 		let tokenId = process.env.REACT_APP_LOYALTY_TOKEN_ID;
-		let accountId = AccountId.fromEvmAddress(0, 0, accountEvmId);
-		var balanceCheckTx = await new AccountBalanceQuery().setAccountId(accountId).execute(client);
-		console.log(`- Alice's balance: ${balanceCheckTx.tokens._map.get(tokenId.toString())} units of token ID ${tokenId}`);
+		
+		// Await the result of queryAccountByEvmAddress
+		let { accountId: accoun } = await queryAccountByEvmAddress(accountEvmId);
+		if (!accoun) {
+			throw new Error("Account ID could not be retrieved.");
+		}
+		
+		let accountId = AccountId.fromString(accoun);
+		let balanceCheckTx = await new AccountBalanceQuery().setAccountId(accountId).execute(client);
+		if (!balanceCheckTx.tokens._map.has(tokenId.toString())) {
+			return 0;
+		}
+		console.log(`- balance: ${balanceCheckTx.tokens._map.get(tokenId.toString())} units of token ID ${tokenId}`);
 		return balanceCheckTx.tokens._map.get(tokenId.toString()).toString();
 	}
 	catch (e) {
@@ -370,8 +379,8 @@ export const fetchLoyaltyTokenBalance = async (accountEvmId, client) => {
 	}
 }
 
-//helper function to convert account id to solidity address
-async function queryAccountByEvmAddress(evmAddress) {
+// Helper function to convert account ID to Solidity address
+const queryAccountByEvmAddress = async (evmAddress) => {
   let accountId;
   let accountBalance;
   let accountEvmAddress;
@@ -381,9 +390,11 @@ async function queryAccountByEvmAddress(evmAddress) {
     const accountFetch = await fetch(accountFetchApiUrl);
     const accountObj = await accountFetch.json();
     const account = accountObj;
-    accountId = account?.account;
-    accountBalance = account?.balance?.balance;
-    accountEvmAddress = account?.evm_address;
+    accountId = account.account;
+    accountBalance = account.balance.balance;
+    accountEvmAddress = account.evm_address;
+
+    console.log(accountId);
   } catch (ex) {
     console.error(ex);
 	return null;
