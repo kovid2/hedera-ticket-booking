@@ -177,6 +177,10 @@ app.post('/api/tickets', upload.fields([{ name: 'ticketImage' }]), async (req, r
 			dateAndTime,
 			description,
 			title } = req.body;
+
+	    if (!price || !numTickets || !walletId || !venue || !ticketTokenName || !city || !country || !dateAndTime || !description || !title) {
+			return res.status(400).json({ error: 'Missing required fields' });
+		}
 	//	const reservationImage = req.files['reservationImage'][0];
 		const ticketImage = req.files['ticketImage'][0];
 
@@ -403,7 +407,32 @@ app.post ('/api/tickets/mint', async (req, res) => {
 	
 });
 
+app.get('/suggest', async (req, res) => {
+  const { term } = req.query;
 
+  if (!term) {
+    return res.status(400).json({ message: 'Search term is required' });
+  }
+
+  const regex = new RegExp(term, 'i'); // Case-insensitive search
+  try {
+    const suggestions = await DB.collection("events").find({
+      $or: [
+        { venue: regex },
+        { city: regex },
+        { country: regex },
+        { description: regex },
+        { title: regex }
+      ]
+    })
+    .select('venue city country description title') // Select only the fields you need for suggestions
+    .limit(10); // Limit the number of suggestions
+
+    res.json(suggestions);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching suggestions', error });
+  }
+});
 
 
 
