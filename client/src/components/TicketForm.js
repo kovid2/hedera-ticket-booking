@@ -2,23 +2,30 @@ import React, { useState } from 'react';
 import { useContext } from 'react';
 import { GlobalAppContext } from '../contexts/GlobalAppContext';
 import { createTickets } from '../network/api';
-
+import Snackbar from './Snackbar/Snackbar';
+import './TicketForm.css'; // Import the CSS file for styling
 
 const TicketForm = () => {
-  const [price, setPrice] = useState('5');
-  const [numTickets, setNumTickets] = useState(10);
-  const [venue, setVenue] = useState('Rogers');
-  const [ticketTokenName, setTicketTokenName] = useState('Maneskin');
-  const [city, setCity] = useState('Toronto');
-  const [country, setCountry] = useState('Canada');
+  const [price, setPrice] = useState('');
+  const [numTickets, setNumTickets] = useState();
+  const [venue, setVenue] = useState('');
+  const [ticketTokenName, setTicketTokenName] = useState('');
+  const [city, setCity] = useState('');
+  const [country, setCountry] = useState('');
   const [dateAndTime, setDateAndTime] = useState('');
-  const [description, setDescription] = useState('Maneskin concert');
-  const [title, setTitle] = useState('Maneskin Concert');
+  const [description, setDescription] = useState('');
+  const [title, setTitle] = useState('');
   const [ticketImage, setTicketImage] = useState(null);
   const { metamaskAccountAddress } = useContext(GlobalAppContext);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault(); // Prevent the default form submission
+
+    if (!metamaskAccountAddress) {
+      Snackbar('Please connect your wallet to create tickets.');
+      return;
+    }
 
     const formData = new FormData();
     formData.append('price', price);
@@ -33,103 +40,112 @@ const TicketForm = () => {
     formData.append('title', title);
     formData.append('ticketImage', ticketImage);
 
-    if (!metamaskAccountAddress) {
-      alert('Please connect your wallet to create tickets.');
-      return;
-    }
-    // Submit the form data to the API
+    setIsLoading(true);
+
     try {
       const res = await createTickets(formData);
+      Snackbar('Tickets created successfully!');
     } catch (error) {
-      console.error('Error submitting form:', error);
+      Snackbar('Error submitting form! Try again!', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <div>
+    <form onSubmit={handleSubmit} className="ticket-form">
+      <h2>Create Your Event Tickets</h2>
+
+      <div className="form-group">
         <label>Title:</label>
         <input
           type="text"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
+          placeholder="Event Title"
           required
+         
         />
       </div>
-      <div>
-        <label>Description:</label>
-        <textarea
+
+      <div className="form-group">
+        <label>Artist:</label>
+        <text
           value={description}
           onChange={(e) => setDescription(e.target.value)}
+          placeholder="Artist or Event Description"
           required
         />
       </div>
-      <div>
-        <label>Price:</label>
+
+      <div className="form-group">
+        <label>Price (in Hbar):</label>
         <input
           type="number"
           value={price}
           onChange={(e) => setPrice(e.target.value)}
+          placeholder="Ticket Price"
           required
         />
       </div>
-      <div>
+
+      <div className="form-group">
         <label>Ticket Token Name:</label>
         <input
           type="text"
           value={ticketTokenName}
           onChange={(e) => setTicketTokenName(e.target.value)}
-          required
-        />
-      </div>
-      <div>
-        <label>Number of Tickets (must be below 10):</label>
-        <input
-          type="number"
-          value={numTickets}
-          onChange={(e) => {
-            const value = parseInt(e.target.value, 10);
-            if (value > 0 && value < 10) {
-              setNumTickets(value);
-            } else {
-              alert("Number of tickets must be between 1 and 9.");
-            }
-          }}
-          min="1"
-          max="10"
+          placeholder="Name of the ticket collection (e.g., Maneskin)"
           required
         />
       </div>
 
-      <div>
+      <div className="form-group">
+        <label>Number of Tickets:</label>
+        <input
+          type="number"
+          value={numTickets}
+          onChange={(e) => setNumTickets(e.target.value)}
+          placeholder="Number of Tickets"
+          min="1"
+          required
+        />
+      </div>
+
+      <div className="form-group">
         <label>Venue:</label>
         <input
           type="text"
           value={venue}
           onChange={(e) => setVenue(e.target.value)}
+          placeholder="Event Venue"
           required
         />
       </div>
 
-      <div>
+      <div className="form-group">
         <label>City:</label>
         <input
           type="text"
           value={city}
           onChange={(e) => setCity(e.target.value)}
+          placeholder="City"
           required
         />
       </div>
-      <div>
+
+      <div className="form-group">
         <label>Country:</label>
         <input
           type="text"
           value={country}
           onChange={(e) => setCountry(e.target.value)}
+          placeholder="Country"
           required
         />
       </div>
-      <div>
+
+      <div className="form-group">
         <label>Date and Time:</label>
         <input
           type="datetime-local"
@@ -139,7 +155,7 @@ const TicketForm = () => {
         />
       </div>
 
-      <div>
+      <div className="form-group">
         <label>Ticket Image:</label>
         <input
           type="file"
@@ -147,7 +163,10 @@ const TicketForm = () => {
           required
         />
       </div>
-      <button class="form" type="submit">Create Tickets</button>
+
+      <button type="submit" className="submit-button" disabled={isLoading}>
+        {isLoading ? 'Creating...' : 'Create Tickets'}
+      </button>
     </form>
   );
 };

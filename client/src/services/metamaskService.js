@@ -1,3 +1,5 @@
+import Snackbar from "../components/Snackbar/Snackbar";
+
 export const switchToHederaNetwork = async (ethereum) => {
   try {
     await ethereum.request({
@@ -22,6 +24,7 @@ export const switchToHederaNetwork = async (ethereum) => {
             },
           ],
         });
+        Snackbar('Added Hedera Testnet to MetaMask');
       } catch (addError) {
         console.error(addError);
       }
@@ -37,6 +40,7 @@ export const connectToMetamask = async () => {
   // keep track of accounts returned
   let accounts = [];
   if (!ethereum) {
+    Snackbar('Metamask is not installed! Go install the extension!');
     throw new Error("Metamask is not installed! Go install the extension!");
   }
   
@@ -47,4 +51,20 @@ export const connectToMetamask = async () => {
   });
 
   return accounts;
+}
+
+//Logout of Metamask
+export const disconnectMetamask = async () => {
+  const { ethereum } = window;
+  if (!ethereum) {
+    Snackbar('Metamask is not installed! Go install the extension!');
+    throw new Error("Metamask is not installed! Go install the extension!");
+  }
+
+  await ethereum.request({
+    method: 'wallet_requestPermissions',
+    params: [{
+      eth_accounts: {}
+    }]
+  });
 }
