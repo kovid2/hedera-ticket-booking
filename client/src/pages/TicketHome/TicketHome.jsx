@@ -41,7 +41,6 @@ export default  function Home() {
 
   return (
     <>
-      <NavBar/>
       <SearchBar/>
       <Banner image={Clancy} eventName='Clancy' eventOrganizer='Twenty One Pilots'/>
 

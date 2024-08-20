@@ -7,6 +7,7 @@ import user from '../../assets/userWhite.svg';
 
 import Profile from '../Profile/Profile';
 import Cart from '../Cart/Cart';
+import {Link} from 'react-router-dom';
 
 export default function NavBar() {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -26,13 +27,13 @@ export default function NavBar() {
     {isCartOpen && <Cart toggleCart={toggleCart} />}
     <div className="navbar">
       <div className="navbar-container">
-        <a href="/Home"><img src={ticketByte} alt="ticketByte Rocks" /></a>
+        <Link to="/"><img src={ticketByte} alt="ticketByte Rocks" /></Link>
         
 
         <div className="navbar-links">
-          <a href="/Events">Events</a>
-          <a href="/MyTickets">My Tickets</a>
-          <a href='/CreateTickets'>Create</a>
+         <Link to="/">Home</Link>
+         <Link to="/profile">My Profile</Link>
+          <Link to="/createTicket">Create</Link>
         </div>
 
         <div className="navbar-button-container">

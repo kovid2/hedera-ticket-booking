@@ -33,6 +33,10 @@ const TicketForm = () => {
     formData.append('title', title);
     formData.append('ticketImage', ticketImage);
 
+    if (!metamaskAccountAddress) {
+      alert('Please connect your wallet to create tickets.');
+      return;
+    }
     // Submit the form data to the API
     try {
       const res = await createTickets(formData);

@@ -14,7 +14,7 @@ export default function EventCard({ event }) {
     const { showSnackbar } = useSnackbar(); // Get the showSnackbar function
 
     let formattedDate = "";
-
+ 
     if (event.dateAndTime) {
         const date = new Date(event.dateAndTime);
         formattedDate = date.toLocaleString('en-US', {
@@ -50,7 +50,7 @@ export default function EventCard({ event }) {
     return (
         <div className="event-card">
             <div className="event-card-image">
-                <img  alt={"cart"} src={EventPlaceHolderImage} />
+                <img  alt={"cart"}  src={`${process.env.REACT_APP_PINATA_GATEWAY}/ipfs/${event.image.substring(7)}`} />
             </div>
 
             <div className="event-card-container">
@@ -59,7 +59,9 @@ export default function EventCard({ event }) {
                         <br />
                         {event.venue} | {event.city}, {event.country}
                     </p>
+                    <h4>{event.description}</h4>
                     <h3>{event.title}</h3>
+                 
                 </div>
                 <div className='event-card-buy'>
                     <button onClick={handleAddToCart}>
