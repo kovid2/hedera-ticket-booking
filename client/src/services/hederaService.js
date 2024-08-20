@@ -378,11 +378,11 @@ export const fetchLoyaltyTokenBalance = async (accountEvmId, client) => {
 			return 0;
 		}
 		console.log(`- balance: ${balanceCheckTx.tokens._map.get(tokenId.toString())} units of token ID ${tokenId}`);
-		return balanceCheckTx.tokens._map.get(tokenId.toString()).toString();
+		return balanceCheckTx.tokens._map.get(tokenId.toString());
 	}
 	catch (e) {
 		console.warn(e);
-		return null;
+		return 0;
 	}
 }
 
