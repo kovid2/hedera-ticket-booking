@@ -58,40 +58,7 @@ export default  function Home() {
 
       
 
-      <button
-        onClick={() => {
-          sendHbarToUser(client, myAccountId, metamaskAccountAddress, 7, myPrivateKey)
-        }}
-      >
-        Transfer HBAR to MetaMask Account
-      </button>
-      <br></br>
-      <button onClick={() => {
-        sentHbarToTreasury(myAccountEvm, 7)
-      }
-      }>
-        Transfer HBAR to Treasury
-      </button>
-      <br></br>
-      <button onClick={() => {
-        mainNftTranferWrapper(myAccountId, metamaskAccountAddress, event, client)
-      }
-      }>
-        Transfer NFT Ticket
-      </button>
-      <br></br>
-      <button onClick={() => {
-        getNFTinformation(event.eventId, client)
-      }
-      }>
-        Get NFT info
-      </button>
-      <button onClick={async () => {
-       setLoyaltyTokenBalance(await fetchLoyaltyTokenBalance(metamaskAccountAddress,client))
-      }}>
-      fetch loyalty balance : {loyaltyTokenBalance}
-      </button>
-
+      
     </>
   )
 }

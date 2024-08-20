@@ -26,9 +26,6 @@ function App() {
       <Route path='/search' element = {<SearchPage />} />
     </Routes>
     <Footer />
-      <h1>Hedera Ticket Booking System</h1>
-      <TicketForm />
-      <ListAllUserTickets />
     </div>
  
     </CartProvider>

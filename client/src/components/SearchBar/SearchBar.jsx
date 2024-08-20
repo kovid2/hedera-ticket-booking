@@ -83,7 +83,7 @@ export default function SearchBar() {
 
                 </div>
                 <div className="search-bar-button">
-                    <button onClick={() => handleSearchButtonClick}>Search</button>
+                    <button onClick={handleSearchButtonClick}>Search</button>
                 </div>
             </div>
             {isLoading && <div className="no-suggestions">Loading...</div>}
