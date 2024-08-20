@@ -45,6 +45,7 @@ export default function MyProfileEventCard({ event }) {
                     </p>
                     <h4>{event.description}</h4>
                     <h3>{event.title}</h3>
+
                  
                 </div>
                
