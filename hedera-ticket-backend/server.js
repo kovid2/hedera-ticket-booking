@@ -469,7 +469,7 @@ app.get('/api/search', async (req, res) => {
 	}
 
 	//strip whitespace and special characters
-	term = term.replace(/[^a-zA-Z0-9]/g, '');
+	term = term.trim();
 
 	const regex = new RegExp(`${term}`, 'i'); // Match the beginning of the string, case-insensitive
 
