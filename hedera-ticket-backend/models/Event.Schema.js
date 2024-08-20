@@ -61,6 +61,7 @@ const EventSchema = new mongoose.Schema({
 		type: Number,
 		required: true,
 	},
+	
 });
 
 const Event = mongoose.model('Event', EventSchema);
