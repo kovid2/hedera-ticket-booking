@@ -64,9 +64,13 @@ export default function EventCard({ event }) {
                  
                 </div>
                 <div className='event-card-buy'>
-                    <button onClick={handleAddToCart}>
+                    { (event.totalTickets > event.ticketsSold) ? <button onClick={handleAddToCart}>
                         <img src={cartImg} alt="cart" />
                     </button>
+                    : <button disabled>
+                       SOLD OUT
+                    </button>
+                    }
                 </div>
             </div>
         </div>

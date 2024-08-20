@@ -3,12 +3,14 @@
 .cart {
     display: flex;
     right: 0;
-    position: absolute;
+    position: fixed;
+    top:0;
+    right:0;
     flex-direction: column;
     width: 431px;
     height: 100%;
     background-color: var.$GS100;
-    z-index: 3;
+    z-index: 53;
 }
 
 .cart-container {

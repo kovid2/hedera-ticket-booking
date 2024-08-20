@@ -2,6 +2,7 @@ import { useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { searchEvents } from '../../network/api';
 import EventCard from '../../components/EventCard/EventCard';
+import SearchBar from '../../components/SearchBar/SearchBar';
 
 export default function SearchPage() {
 	const location = useLocation();
@@ -36,6 +37,7 @@ export default function SearchPage() {
     }, [location.search]);
   return (
 	<>
+	<SearchBar />
 	<div className="search-page">
 	<div className="home-content">
 		        <h1>SEARCH RESULTS FOR {`${searchTerm}`}</h1>

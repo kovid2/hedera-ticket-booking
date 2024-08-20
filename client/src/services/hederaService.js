@@ -192,6 +192,7 @@ export const transferTicketNFT = async (fromAddress, toEVMAddress, event, client
 	let res = await freezeToken(event.eventID, event.freezeKey, client, toEVMAddress);
 	//console.log(res);
 	return tokenTransferRx;
+
 }
 
 /**
@@ -329,8 +330,14 @@ const freezeToken = async (tokenId, freezeKey, client, accountId) => {
 	console.log(`Token ID: ${tokenId}`);
 	console.log(`Freeze Key: ${freezeKey}`);
 	console.log(`Account ID: ${accountId}`);
-
-	const toAddress = AccountId.fromString(await queryAccountByEvmAddress(accountId).accountId);
+	// Await the result of queryAccountByEvmAddress
+	let { accountId: accoun } = await queryAccountByEvmAddress(accountId);
+		if (!accoun) {
+			throw new Error("Account ID could not be retrieved.");
+		}
+		
+	let toAddress = AccountId.fromString(accoun);
+	//const toAddress = AccountId.fromString(await queryAccountByEvmAddress(accountId).accountId);
 
 	//Freeze an account from transferring a token
 	const transaction = await new TokenFreezeTransaction()
