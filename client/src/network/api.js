@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const URL = process.env.REACT_APP_BACKEND_URL;
+const URL =  process.env.REACT_APP_PRODUCTION ? process.env.REACT_APP_PRODUCTION_BACKEND_URL : process.env.REACT_APP_BACKEND_URL;
 export const fetchUser = async (accountId) => {
 	try {
 		const res = await axios.get(`${URL}/api/user/${accountId}`);
