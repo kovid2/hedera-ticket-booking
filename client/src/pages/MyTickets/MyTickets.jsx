@@ -34,6 +34,7 @@ export default function MyTickets() {
 
 	useEffect(() => {
 		const fetchTickets = async () => {
+			try{
 			let res = await fetchAllUserTickets(metamaskAccountAddress);
 			console.log(res);
 			setBoughtTickets(res.events);
@@ -41,7 +42,13 @@ export default function MyTickets() {
 			res = await fetchUserCreatedEvents(metamaskAccountAddress);
 			setCreatedTickets(res.events);
 			res = await fetchLoyaltyTokenBalance(metamaskAccountAddress, client);
-			setLoyaltyTokens(res.loyaltyPoints);
+			setLoyaltyTokens(res);
+			}
+			catch (error) {
+				showSnackbar(`There was an error fetching user tickets
+				`, 'error');
+				console.error(error);
+			}
 		};
 		fetchTickets();
 		console.log(loyaltyTokens);
@@ -57,7 +64,7 @@ export default function MyTickets() {
 					<div className="profile-info">
 						{user && <div className="profile-info-row">
 							<p><strong>Wallet Address:</strong> {metamaskAccountAddress}</p>
-							<p> <strong>Loyalty Tokens: </strong> {loyaltyTokens}</p>
+							<p> <strong>Loyalty Tokens: </strong> {loyaltyTokens} (You can buy tickets with this in future)</p>
 						</div>}
 					</div>
 					<div className="divider-screen"></div>
@@ -80,8 +87,8 @@ export default function MyTickets() {
 					<div className="line-accent"></div>
 					<div className="events-container-1">
 					{createdTickets.length > 0 ? (
-						createdTickets.map((event) => (
-							<div key={event.eventID} className="event-card">
+						createdTickets.map((event,idx) => (
+							<div key={`${event.event}-${idx}`} className="event-card-1">
 								<EventCreatedCard event={event} />
 							</div>
 						))

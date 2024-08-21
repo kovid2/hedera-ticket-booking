@@ -29,12 +29,13 @@ export default function EventCard({ event }) {
         });
     }
 
-    const handleAddToCart = () => {
+    const handleAddToCart = async () => {
         if (!metamaskAccountAddress) {
             showSnackbar('Please connect your wallet to add events to cart.', 'error');
             return;
         }
-        let userBal = checkIfUserHasNft(metamaskAccountAddress, event.eventID, client);
+        let userBal = await checkIfUserHasNft(metamaskAccountAddress, event.eventID, client);
+        console.log(userBal);    
         if( userBal){
             showSnackbar(`You already have ${event.title} in your wallet! Cannot buy more than one!`, 'error');
             return;
@@ -67,6 +68,8 @@ export default function EventCard({ event }) {
                     <p>{formattedDate}
                         <br />
                         {event.venue} | {event.city}, {event.country}
+                        <br/>
+                        <strong>{event.totalTickets-event.ticketsSold} tickets left!</strong>
                     </p>
                     <h4>{event.description}</h4>
                     <h3>{event.title}</h3>

@@ -1,5 +1,5 @@
 import { AccountId, Client, PrivateKey } from "@hashgraph/sdk";
-import { useContext, useState } from "react";
+import { useContext, useState,useEffect } from "react";
 import { GlobalAppContext } from "../../contexts/GlobalAppContext";
 import { fetchLoyaltyTokenBalance, getNFTinformation, mainNftTranferWrapper, sendHbarToUser , sentHbarToTreasury, transferLoyaltyToken, transferTicketNFT} from '../../services/hederaService'
 
@@ -13,9 +13,9 @@ import ListAllEvents from "../../components/ListAllEvents/ListAllEvents";
 import Footer from "../../components/Footer/Footer";
 
 import Clancy from '../../assets/clancy.png';
+import { fetchAllTicketsFromDb } from "../../network/api";
 
 export let client;
-
 export default  function Home() {
   const { metamaskAccountAddress } = useContext(GlobalAppContext);
   const [loyaltyTokenBalance, setLoyaltyTokenBalance] = useState('');
@@ -23,12 +23,6 @@ export default  function Home() {
   // If we weren't able to grab it, we should throw a new error
   if (!process.env.REACT_APP_MY_ACCOUNT_ID || !process.env.REACT_APP_MY_PRIVATE_KEY) {
     throw new Error("Environment variables REACT_APP_MY_ACCOUNT_ID and REACT_APP_MY_PRIVATE_KEY must be present");
-  }
-
-  const event = {
-    eventId: "0.0.4672972",
-    ticketsSold: 4,
-    price : 4,
   }
 
   // create your client
@@ -44,7 +38,7 @@ export default  function Home() {
       <SearchBar/>
      { //TODO:MAKE IT DYNAMIC 
      }
-      <Banner image={Clancy} eventName='Clancy' eventOrganizer='Twenty One Pilots'/>
+      <Banner image={Clancy} eventName='Clancy Tour' eventOrganizer='Twenty One Pilots'/>
 
       <div className="divider-screen"></div>
 

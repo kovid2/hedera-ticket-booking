@@ -184,7 +184,10 @@ const CreateTickets = () => {
         />
       </div>
      
-    <input type='checkbox' required/> <span> I agree to the terms and conditions </span>
+    <input type='checkbox' required/> <span>
+          I agree to the 
+          <a href="/terms" target="_blank" rel="noopener noreferrer"> terms and conditions</a>
+        </span>
 
       <button type="submit" className="submit-button" disabled={isLoading}>
         {isLoading ? 'Creating...' : 'Create Tickets'}

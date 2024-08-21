@@ -14,7 +14,7 @@ export default function SearchBar() {
         const term = e.target.value;
         setSearchTerm(term);
 
-        if (term.length >= 2) {
+        if (term.length >= 1) {
             setIsLoading(true);
             clearTimeout(debounceTimeout);
             debounceTimeout = setTimeout(async () => {
@@ -121,7 +121,7 @@ export default function SearchBar() {
                     ))}
                 </ul>
             )}
-            {suggestions && suggestions.length === 0 && !isLoading && searchTerm.length >= 2 && (
+            {suggestions && suggestions.length === 0 && !isLoading && searchTerm.length >= 1 && (
                 <div className="no-suggestions">No suggestions found</div>
             )}
             </div>

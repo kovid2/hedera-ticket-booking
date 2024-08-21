@@ -35,21 +35,18 @@ export default function Cart({ toggleCart }) {
 
     const buyTicket = async (event) => {
         try{
-            setDisableButton(true);
+           
             showSnackbar(`Buying ticket for ${event.title}`, 'success'); // Use snackbar for buying ticket
             await mainNftTranferWrapper(myAccountId, metamaskAccountAddress, event, client);
             showSnackbar(`Ticket for ${event.title} bought successfully!`, 'success'); // Use snackbar for buying ticket success
         }
         catch (error) {
             showSnackbar(`There was an error buying ticket for ${event.title}`, 'error'); // Use snackbar for buying ticket error
-        }  finally
-        {
-            setDisableButton(false);
-        }
+        } 
     };
 
     const checkout = async () => {
-
+        setDisableButton(true);
         if (!metamaskAccountAddress) {
             showSnackbar("You need to connect your MetaMask wallet.", 'error'); // Show snackbar if MetaMask is not connected
             return;
@@ -63,6 +60,9 @@ export default function Cart({ toggleCart }) {
             showSnackbar("Thank you for buying tickets with ticketByte!", 'success'); // Use snackbar for checkout success
         } catch (error) {
             showSnackbar("There was an error with your purchase.", 'error'); // Use snackbar for errors
+        } finally
+        {
+            setDisableButton(false);
         }
     };
 
@@ -106,7 +106,9 @@ export default function Cart({ toggleCart }) {
                             <h1>{total}</h1>
                         </div>
                     </div>
-                    <TextButton text="CHECKOUT" onClick={checkout} />
+                    <button onClick={checkout} className="submit-button" disabled={disableButton}>
+        {disableButton ? 'Processing...' : 'Checkout'}
+      </button>
                 </div>
             </div>
 

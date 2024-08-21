@@ -16,7 +16,15 @@ export default function ListAllEvents() {
             try {
                 let res = await fetchAllTicketsFromDb();
                 if (Array.isArray(res)) {
-                    setEvents(res);
+                    const now = new Date();
+                    const futureEvents = res.filter(event => {
+                        if (event.dateAndTime) {
+                            const eventDate = new Date(event.dateAndTime);
+                            return eventDate > now;
+                        }
+                        return false;
+                    });
+                    setEvents(futureEvents);
                 } else {
                     console.error("Fetched data is not an array:", res);
                 }

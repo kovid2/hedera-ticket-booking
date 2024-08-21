@@ -32,6 +32,12 @@ export default function EventCreatedCard({ event }) {
             hour12: true
         });
     }
+	const renderDecimalValue = (decimalObject) => {
+		if (decimalObject && decimalObject.$numberDecimal) {
+			return decimalObject.$numberDecimal;
+		}
+		return decimalObject; // or return a default value like "0"
+	};
 
     const handleTranferRevenue = async() => {
 		setDisableButton(true);
@@ -75,9 +81,9 @@ export default function EventCreatedCard({ event }) {
 						<span>Total Net Revenue: {event.netRevenue} Hbar</span>
 						<br />
 						<br />
-						<span>Revenue Already Transferred: {event.paymentClaimed} Hbar</span>
+						<span>Revenue Already Transferred: {renderDecimalValue(event.paymentClaimed)} Hbar</span>
 						<br />
-						<span>Claimable Revenue: {event.claimable} Hbar</span>
+						<span>Claimable Revenue: {renderDecimalValue(event.claimable)} Hbar</span>
                     </p>
                     <h4>{event.description}</h4>
                     <h3>{event.title}</h3>
@@ -86,7 +92,7 @@ export default function EventCreatedCard({ event }) {
                 </div>
                 <div className='event-card-buy-1'>
 					<p>Tickets sold: {event.ticketsSold} of {event.totalTickets} </p>
-                    { (event.claimable >0) ? <button disabled={disableButton} onClick={handleTranferRevenue}>
+                    { (renderDecimalValue(event.claimable) >0) ? <button disabled={disableButton} onClick={handleTranferRevenue}>
                         CLAIM
                     </button>
                     : <button disabled>

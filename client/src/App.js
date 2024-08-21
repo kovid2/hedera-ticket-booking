@@ -12,6 +12,7 @@ import CreateTickets from './pages/CreateTickets/CreateTickets';
 import Footer from './components/Footer/Footer';
 import SearchPage from './pages/SearchPage/SearchPage';
 import MyTickets from './pages/MyTickets/MyTickets';
+import Terms from './pages/TnC/Terms';
 function App() {
   const { metamaskAccountAddress, setMetamaskAccountAddress } = useContext(GlobalAppContext);
   useEffect(() => {
@@ -33,6 +34,7 @@ function App() {
       <Route path='/createTicket' element = {<CreateTickets />} />
       <Route path='/profile' element = {<MyTickets/>} />
       <Route path='/search' element = {<SearchPage />} />
+      <Route path='/terms' element= {<Terms/>} />
     </Routes>
     <Footer />
     </div>
