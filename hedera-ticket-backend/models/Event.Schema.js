@@ -62,8 +62,8 @@ const EventSchema = new mongoose.Schema({
 		required: true,
 	},
 	paymentClaimed: {
-		type: Number,
-		default: 0,
+		type: mongoose.Types.Decimal128,
+		default: mongoose.Types.Decimal128.fromString('0'),
 	},
 	
 });

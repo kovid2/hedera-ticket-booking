@@ -480,6 +480,7 @@ app.get('/api/suggest', async (req, res) => {
 			if (regex.test(event.description)) result.description = event.description;
 			if (regex.test(event.title)) result.title = event.title;
 
+			
 			return result;
 		});
 
@@ -524,7 +525,7 @@ app.get('/api/search', async (req, res) => {
 
 
 //API to transfer funds to user for their sales
-app.post('/api/fundstransfer', async (req, res) => {
+app.post('/api/funds/transfer', async (req, res) => {
 
 	try {
 		const { eventID, accountId } = req.body;
@@ -554,7 +555,7 @@ app.post('/api/fundstransfer', async (req, res) => {
 			.addHbarTransfer(toAddress, event.claimable)
 			.freezeWith(client);
 
-		const transferHbarTransactionSigned = await transferHbarTransaction.sign(operatorPrivateKey);
+		const transferHbarTransactionSigned = await transferHbarTransaction.sign(PrivateKey.fromStringDer(process.env.MY_PRIVATE_KEY));
 		const transferHbarTransactionResponse = await transferHbarTransactionSigned.execute(client);
 
 		// Get the child receipt or child record to return the Hedera Account ID for the new account that was created
@@ -563,6 +564,10 @@ app.post('/api/fundstransfer', async (req, res) => {
 			.setIncludeChildren(true)
 			.execute(client);
 		console.log(`Transaction Status: ${transactionReceipt.status}`);
+
+		//update event's paymentClaimed
+		await DB.collection("events").findOneAndUpdate({ eventID: event.eventID }, { $inc: { paymentClaimed: parseFloat(event.claimable) } });
+		return res.status(200).json({ message: 'Funds transferred successfully' });
 	}
 	catch (error) {
 		console.error('Error transferring funds:', error);
