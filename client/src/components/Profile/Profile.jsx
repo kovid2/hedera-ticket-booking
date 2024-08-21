@@ -23,6 +23,7 @@ export default function Profile({ toggleProfile }) {
     const retrieveWalletAddress = async () => {
         console.log("retrieving wallet address");
         const addresses = await connectToMetamask();
+        localStorage.setItem('address', addresses[0]);
         
         console.log(addresses);
 

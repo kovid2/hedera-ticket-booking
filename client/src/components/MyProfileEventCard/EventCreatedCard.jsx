@@ -1,7 +1,7 @@
 
 import './EventCreatedCard.scss';
 
-import React, { useContext } from 'react';
+import React, { useContext,useState } from 'react';
 import { GlobalAppContext } from "../../contexts/GlobalAppContext";
 import { CartContext } from '../../contexts/CartContext';
 import { useSnackbar } from '../../contexts/SnackbarContext'; // Import the useSnackbar hook
@@ -10,11 +10,14 @@ import EventPlaceHolderImage from '../../assets/eventPlaceholderImage.png';
 import cartImg from '../../assets/shoppingCart.svg';
 import { client } from '../../pages/TicketHome/TicketHome';
 import { checkIfUserHasNft } from '../../services/hederaService';
+import { claimFunds } from '../../network/api';
 
 export default function EventCreatedCard({ event }) {
     const { metamaskAccountAddress } = useContext(GlobalAppContext);
     const { addToCart , cart} = useContext(CartContext); 
     const { showSnackbar } = useSnackbar(); // Get the showSnackbar function
+	const [disableButton, setDisableButton] = React.useState(false);
+	const [forceFetch, setForceFetch] = useState(false);
 
     let formattedDate = "";
  
@@ -30,12 +33,27 @@ export default function EventCreatedCard({ event }) {
         });
     }
 
-    const handleTranferRevenue = () => {
+    const handleTranferRevenue = async() => {
+		setDisableButton(true);
 		if (!metamaskAccountAddress) {
 			showSnackbar('Please connect your wallet to transfer revenue.', 'error');
+			setDisableButton(false);
 			return;
 		}
-		showSnackbar(`Revenue for ${event.title} transferred successfully!`, 'success');
+		try{
+			const res = await claimFunds(metamaskAccountAddress, event.eventID);
+			showSnackbar(`Revenue for ${event.title} transferred successfully!`, 'success');
+
+		}
+		catch (error) {
+			showSnackbar(`There was an error transferring revenue for ${event.title}`, 'error');
+		}
+		finally
+		{
+			event.claimable = 0;
+			setDisableButton(false);
+		}
+		
 	}
     return (
         <div className="event-card-1">
@@ -68,11 +86,11 @@ export default function EventCreatedCard({ event }) {
                 </div>
                 <div className='event-card-buy-1'>
 					<p>Tickets sold: {event.ticketsSold} of {event.totalTickets} </p>
-                    { (event.totalTickets > event.ticketsSold) ? <button onClick={handleTranferRevenue}>
-                        TRANSFER
+                    { (event.claimable >0) ? <button disabled={disableButton} onClick={handleTranferRevenue}>
+                        CLAIM
                     </button>
                     : <button disabled>
-                       SOLD OUT
+                       NO CLAIMS
                     </button>
                     }
                 </div>

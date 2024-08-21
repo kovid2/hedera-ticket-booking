@@ -104,3 +104,14 @@ export const searchEvents = async (term) => {
 		return null;
 	}
 }
+
+
+export const claimFunds = async (accountId, eventID) => {
+	try {
+		const res = await axios.post(`${URL}/api/funds/transfer`, { accountId, eventID });
+		return res.data;
+	} catch (e) {
+		console.warn(e);
+		return null;	
+	}
+}	

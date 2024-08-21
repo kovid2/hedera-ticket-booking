@@ -18,16 +18,22 @@ const CreateTickets = () => {
   const [description, setDescription] = useState('');
   const [title, setTitle] = useState('');
   const [ticketImage, setTicketImage] = useState(null);
-  const { metamaskAccountAddress } = useContext(GlobalAppContext);
+  const { metamaskAccountAddress, setMetamaskAccountAddress} = useContext(GlobalAppContext);
   const [isLoading, setIsLoading] = useState(false);
   const {showSnackbar} = useSnackbar();
   const navigate = useNavigate();
   useEffect(() => {
-    if (!metamaskAccountAddress) {
-     showSnackbar('Please connect your wallet to create tickets.' , 'error');
-     navigate('/');
+    let addr = localStorage.getItem('address');
+    if(addr){
+      console.log(addr);
+      setMetamaskAccountAddress(addr);
     }
-  }, []);
+    else{
+      showSnackbar('Please connect your wallet to create tickets.' , 'error');
+      navigate('/');
+    }
+  },[]);
+
   const handleSubmit = async (e) => {
     e.preventDefault(); // Prevent the default form submission
 

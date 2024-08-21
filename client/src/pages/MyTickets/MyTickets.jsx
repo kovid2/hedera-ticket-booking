@@ -21,6 +21,9 @@ export default function MyTickets() {
 	const [loyaltyTokens, setLoyaltyTokens] = useState('');
 	const [payoutTokens, setPayoutTokens] = useState(0);
 
+
+	
+
 	useEffect(() => {
 		if (!metamaskAccountAddress) {
 			showSnackbar('Please connect your wallet to access your profile.', 'error');

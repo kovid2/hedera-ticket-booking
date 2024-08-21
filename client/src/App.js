@@ -1,7 +1,7 @@
-import React from 'react';
+import React, {useContext,useEffect} from 'react';
 import TicketForm from './components/TicketForm';
 import TicketHome from './pages/TicketHome/TicketHome';
-import { GlobalAppContextProvider } from './contexts/GlobalAppContext';
+import { GlobalAppContext, GlobalAppContextProvider } from './contexts/GlobalAppContext';
 import { CartProvider } from './contexts/CartContext';
 import { SnackbarProvider } from './contexts/SnackbarContext';
 import ListAllEvents from './components/ListAllEvents/ListAllEvents';
@@ -13,9 +13,17 @@ import Footer from './components/Footer/Footer';
 import SearchPage from './pages/SearchPage/SearchPage';
 import MyTickets from './pages/MyTickets/MyTickets';
 function App() {
+  const { metamaskAccountAddress, setMetamaskAccountAddress } = useContext(GlobalAppContext);
+  useEffect(() => {
+    let addr = localStorage.getItem('address');
+    if(addr){
+      console.log(addr);
+      setMetamaskAccountAddress(addr);
+    }
+  },[]);
   return (
     <SnackbarProvider>
-    <GlobalAppContextProvider>
+
     <CartProvider>
    
     <div className="App">
@@ -28,9 +36,8 @@ function App() {
     </Routes>
     <Footer />
     </div>
- 
     </CartProvider>
-    </GlobalAppContextProvider>
+
     </SnackbarProvider>
   );
 }
