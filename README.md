@@ -1,8 +1,11 @@
-# ticketByTE
+# ticketByte
+
+![ticketByte](https://github.com/user-attachments/assets/d7739ac3-8558-4013-a109-2d07d14a9e6b)
+
 
 ## Overview
 
-`ticketByTE` is a blockchain-based platform for buying and managing concert tickets, utilizing the Hedera network to ensure secure, transparent, and fair ticketing. The platform limits users to one ticket per wallet to prevent scalping and uses Hedera's technology to prevent unauthorized ticket transfers.
+`ticketByte` is a blockchain-based platform for buying and managing concert tickets, utilizing the Hedera network to ensure secure, transparent, and fair ticketing. The platform limits users to one ticket per wallet to prevent scalping and uses Hedera's technology to prevent unauthorized ticket transfers.
 
 ## Features
 
