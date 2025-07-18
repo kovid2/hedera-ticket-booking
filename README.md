@@ -1,7 +1,7 @@
 # ticketByte
 
 ![ticketByte](https://github.com/user-attachments/assets/d7739ac3-8558-4013-a109-2d07d14a9e6b)
-
+<img width="1440" height="1024" alt="Homepage - Desktop" src="https://github.com/user-attachments/assets/fe104b4d-c1a4-4afd-92bc-2f309d831c0f" />
 
 ## Overview
 
